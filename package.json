@@ -9,6 +9,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "cron": "^1.8.2"
   },
   "devDependencies": {
   }
