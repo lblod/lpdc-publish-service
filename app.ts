@@ -1,4 +1,4 @@
-import { app, errorHandler, uuid } from 'mu';
+import { app, errorHandler, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { prefixes } from "./prefixes";
@@ -7,10 +7,9 @@ import {
 } from './env-config'
 
 
-const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
-  // poll data here
-  try{
-   const queryString = `
+
+const pollData = async (): object => {
+   const queryString: string = `
    ${prefixes}
    SELECT ?s WHERE  {
      GRAPH ?g{
@@ -19,7 +18,15 @@ const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
    }
    `;
     const response = await query(queryString);
+  const result:object = (await query(queryString)).results.bindings;
+  return result; 
+};
 
+
+
+const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
+  try{
+    const polledData = await pollData();
   } catch(e){
     console.log(e);
   }
