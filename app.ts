@@ -4,6 +4,9 @@ import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { prefixes } from "./prefixes";
 import {
   CRON_PATTERN,
+  LDES_ENDPOINT,
+  LDES_FRAGMENTER,
+  LDES_RELATION_PATH,
 } from './env-config'
 
 
