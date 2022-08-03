@@ -7,6 +7,8 @@ PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX adms:  <http://www.w3.org/ns/adms#>
 PREFIX vocab: <http://vocab.belgif.be/ns/publicservice#>
 PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+PREFIX schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 `;
 
 
