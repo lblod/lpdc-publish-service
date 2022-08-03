@@ -27,11 +27,13 @@ const pollData = async (): object => {
   return result; 
 };
 
+const postDataToLDES = (data)  => data;
 
 
 const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
+    const postedData = postDataToLDES(polledData);
   } catch(e){
     console.log(e);
   }
