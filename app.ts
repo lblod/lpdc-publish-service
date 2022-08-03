@@ -8,16 +8,21 @@ import {
 
 
 
+/*
+ * Poll data from any graphs 
+ *
+ */
 const pollData = async (): object => {
    const queryString: string = `
    ${prefixes}
-   SELECT ?s WHERE  {
-     GRAPH ?g{
-       ?s a cpsv:PublicService.
+   SELECT ?publicService ?status ?puburi ?label WHERE {
+     GRAPH ?graph{
+       ?publicService a cpsv:PublicService; adms:status ?status.
+      OPTIONAL {
+       ?status schema:publication ?puburi; skos:prefLabel ?label.
+       }
      }
-   }
-   `;
-    const response = await query(queryString);
+   }`;
   const result:object = (await query(queryString)).results.bindings;
   return result; 
 };
