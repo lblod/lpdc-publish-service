@@ -32,7 +32,25 @@ const postDataToLDES = (data)  => data;
 /*
  * insert the status of posted data.
  */
-const  updatePostedData = (postedData) => postedData ;
+const  updatePostedData = async (postedData) => {
+    if ( postedData.length == 0 ) {
+      console.log("No data to update");
+      return postedData;
+    } else {
+    const sentUri:string = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
+    const quadString:string = postedData.filter( (e) =>  e.puburi==undefined)
+      .map( (e) => {
+        return `GRAPH <${process.env.MU_APPLICATION_GRAPH}>  {
+                 <http://dummy/doc> schema:publication ${sentUri}.
+        }`;
+      }).join("\n");
+    const resp = await update(`${prefixes}
+                              INSERT DATA {
+                                ${quadString}
+                              }`);
+    return resp.results.bindings;
+    }
+};
 
 const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
   try{
