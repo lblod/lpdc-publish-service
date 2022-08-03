@@ -40,8 +40,9 @@ const  updatePostedData = async (postedData) => {
     const sentUri:string = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
     const quadString:string = postedData.filter( (e) =>  e.puburi==undefined)
       .map( (e) => {
-        return `GRAPH <${process.env.MU_APPLICATION_GRAPH}>  {
-                 <http://dummy/doc> schema:publication ${sentUri}.
+        return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
+          ${sparqlEscapeUri(e.status.value)} schema:publication ${sentUri};
+                skos:prefLabel "Published to app-digitaal-loket-ldes-feed".
         }`;
       }).join("\n");
     const resp = await update(`${prefixes}
