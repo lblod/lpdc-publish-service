@@ -15,8 +15,8 @@ import {
  * Poll data from any graphs 
  *
  */
-const pollData = async (): object => {
-   const queryString: string = `
+const pollData = async () => {
+   const queryString = `
    ${prefixes}
    SELECT ?publicService ?status ?puburi ?label WHERE {
      GRAPH ?graph{
@@ -26,7 +26,7 @@ const pollData = async (): object => {
        }
      }
    }`;
-  const result:object = (await query(queryString)).results.bindings;
+  const result = (await query(queryString)).results.bindings;
   return result; 
 };
 
@@ -40,8 +40,8 @@ const  updatePostedData = async (postedData) => {
       console.log("No data to update");
       return postedData;
     } else {
-    const sentUri:string = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
-    const quadString:string = postedData.filter( (e) =>  e.puburi==undefined)
+    const sentUri = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
+    const quadString = postedData.filter( (e) =>  e.puburi==undefined)
       .map( (e) => {
         return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
           ${sparqlEscapeUri(e.status.value)} schema:publication ${sentUri};
@@ -56,7 +56,7 @@ const  updatePostedData = async (postedData) => {
     }
 };
 
-const pollingJob: CronJob = new CronJob( CRON_PATTERN, async () => {
+const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
     const postedData = postDataToLDES(polledData);
