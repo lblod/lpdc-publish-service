@@ -84,8 +84,14 @@ const  updatePostedData = async (postedData) => {
 const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
-    const postedData = postDataToLDES(polledData);
-    const endResult = await updatePostedData(postedData);
+    const codeRequest = await postDataToLDES(polledData);
+    // if error in ldes-proxy
+    if (codeRequest >=400) {
+      console.log(" error while posting data to ldes");
+    } else{
+      // update polled triples
+      const endResult = await updatePostedData(polledData);
+    }
   } catch(e){
     console.log(e);
   }
