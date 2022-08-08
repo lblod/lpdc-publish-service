@@ -6,9 +6,7 @@ import { prefixes } from "./prefixes";
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
-  LDES_FRAGMENTER,
-  LDES_RELATION_PATH,
-  LDES_STREAM
+  LDES_FOLDER,
 } from './env-config'
 
 
@@ -32,25 +30,24 @@ const pollData = async () => {
   return result; 
 };
 
+/*
+ * format request and send data to ldes feed
+ */
 async function sendLDESRequest(uri, body) {
   console.log(LDES_ENDPOINT);
   try{
     const queryParams = new URLSearchParams({
       resource: uri,
-      // stream: LDES_STREAM,
-      // "relation-path": LDES_RELATION_PATH,
-      fragmenter: LDES_FRAGMENTER,
     });
 
-
-    const result = await fetch(`${LDES_ENDPOINT}?` + queryParams, {
+    const result = await fetch(`${LDES_ENDPOINT}${LDES_FOLDER}?` + queryParams, {
       method: "POST",
       headers: {
         "Content-Type": "text/turtle",
       },
       body: body,
     });
-    return result;
+    return result.status;
   } catch (e) {
     console.log(e);
   }
