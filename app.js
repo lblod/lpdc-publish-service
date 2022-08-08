@@ -10,19 +10,28 @@ import {
 } from './env-config'
 
 
+// to add predicates in the request
+const extraProperties = [ "purl:title", "purl:source"]
+const extraPropertiesEntries = extraProperties.map(e=> [ e.split(":").slice(-1)[0], e]);
+const extraPropertiesDict = Object.fromEntries(extraPropertiesEntries);
 
 /*
  * Poll data from any graphs 
  *
  */
 const pollData = async () => {
+   const propertiesString = extraPropertiesEntries.map(e=>e.reverse().join(" ?")).join(";")
+   const extraVariables = Object.keys(extraPropertiesDict).map(e=>"?"+e);
    const queryString = `
    ${prefixes}
-   SELECT ?publicService ?status ?puburi ?label WHERE {
-     GRAPH ?graph{
-       ?publicService a cpsv:PublicService; adms:status ?status.
+   select ?publicservice ?status ?puburi ?label ${extraVariables.join(" ")} where {
+     graph ?graph{
+       ?publicservice a cpsv:PublicService; adms:status ?status.
       OPTIONAL {
-       ?status schema:publication ?puburi; skos:prefLabel ?label.
+       ?publicservice ${propertiesString}.
+       }
+      OPTIONAL {
+       ?status schema:publication ?puburi; skos:preflabel ?label.
        }
      }
    }`;
