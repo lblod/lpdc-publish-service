@@ -9,6 +9,7 @@ import {
   LDES_FOLDER,
 } from './env-config'
 
+const propertiesDict = { "status":"adms:status", "label":"skos:prefLabel", "puburi":"schema:publication"};
 
 // to add predicates in the request
 const extraProperties = [ "purl:title", "purl:source"]
@@ -93,6 +94,17 @@ const  updatePostedData = async (postedData) => {
     return resp.results.bindings;
     }
 };
+
+const polledDataToRDF = (dataDict) => (data) => {
+  const fieldToString = (field) => field.type=="uri"?`<${field.value}>`:`"field.value"`;
+  const result = data.map(triple =>
+    `${fieldToString(triple["publicservice"])} `+
+    Object.keys(triple).filter(k=> dataDict[k])
+      .map(k => `${dataDict[k]} ${fieldToString(triple[k])}`)
+      .join("; ")+"."
+  ).join("\n") ;
+  return prefixes.replace(/PREFIX/g, "@prefix").replace(/\n/g,".\n")+result;
+}
 
 const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
