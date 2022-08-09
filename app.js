@@ -63,9 +63,9 @@ async function sendLDESRequest(uri, body) {
   }
 }
 
-const postDataToLDES = async (data)  => {
+const postDataToLDES = async (formatFn) => (data)  => {
   if ( data.length > 0 ){
-    return await sendLDESRequest("http://mu.semte.ch/streams/", data);
+    return await sendLDESRequest("http://mu.semte.ch/streams/", formatFn(data));
   } else {
     console.log("no data to post");
   }
@@ -109,7 +109,8 @@ const polledDataToRDF = (dataDict) => (data) => {
 const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
-    const codeRequest = await postDataToLDES(polledData);
+    const formatPolledData = polledDataToRDF({...propertiesDict, ...extraPropertiesDict});
+    const codeRequest = await postDataToLDES(formatPolledData)(polledData);
     // if error in ldes-proxy
     if (codeRequest >=400) {
       console.log(" error while posting data to ldes");
