@@ -63,7 +63,11 @@ async function sendLDESRequest(uri, body) {
 }
 
 const postDataToLDES = async (data)  => {
+  if ( data.length > 0 ){
     return await sendLDESRequest("http://mu.semte.ch/streams/", data);
+  } else {
+    console.log("no data to post");
+  }
 };
 
 /*
