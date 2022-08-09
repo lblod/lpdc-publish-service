@@ -1,5 +1,4 @@
-export const prefixes = `
-PREFIX prov:  <http://www.w3.org/ns/prov#>
+export const prefixes = `PREFIX prov:  <http://www.w3.org/ns/prov#>
 PREFIX purl:  <http://purl.org/dc/terms/>
 PREFIX cpsv:  <http://purl.org/vocab/cpsv#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
