@@ -11,6 +11,7 @@
   "dependencies": {
     "@lblod/mu-auth-sudo": "^0.6.0",
     "cron": "^1.8.2"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
   }
