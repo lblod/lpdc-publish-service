@@ -63,7 +63,7 @@ async function sendLDESRequest(uri, body) {
   }
 }
 
-const postDataToLDES = async (formatFn) => (data)  => {
+const postDataToLDES = (formatFn) => async  (data)  => {
   if ( data.length > 0 ){
     return await sendLDESRequest("http://mu.semte.ch/streams/", formatFn(data));
   } else {
