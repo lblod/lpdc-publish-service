@@ -84,21 +84,11 @@ const  updatePostedData = async (postedData) => {
         }`;
       }).join("\n");
 
-    const deleteQuadString = postedData
-      .map( e=> {
-        return `GRAPH ${sparqlEscapeUri(e.graph.value)}{
-          ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(e.status.value)}.
-          }`;
-      });
 
     const resp = await update(`${prefixes}
                               INSERT DATA {
                                 ${insertQuadString}
-                              }
-                              DELETE DATA {
-                                ${deleteQuadString}
-                              }
-    `);
+                              }`);
     return resp.results.bindings;
     }
 };
