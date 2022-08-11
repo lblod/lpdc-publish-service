@@ -16,7 +16,6 @@ const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-
 const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
 
 
-// to add predicates in the request
 
 /*
  * Poll data from any graphs 
