@@ -43,33 +43,29 @@ const pollData = async () => {
 /*
  * format request and send data to ldes feed
  */
-async function sendLDESRequest(uri, body) {
-  console.log(LDES_ENDPOINT);
-  try{
-    const queryParams = new URLSearchParams({
-      resource: uri,
-    });
+const  postDataToLDES = (formatFn) => (uri) => async (data) =>  {
+  if ( data.length > 0 ){
+    body = formatFn(data);
+    try{
+      const queryParams = new URLSearchParams({
+        resource: uri,
+      });
 
-    const result = await fetch(`${LDES_ENDPOINT}${LDES_FOLDER}?` + queryParams, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/turtle",
-      },
-      body: body,
-    });
-    return result;
-  } catch (e) {
-    console.log(e);
+      const result = await fetch(`${LDES_ENDPOINT}${LDES_FOLDER}?` + queryParams, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/turtle",
+        },
+        body: body,
+      });
+      return result;
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   }
 }
 
-const postDataToLDES = (formatFn) => async  (data)  => {
-  if ( data.length > 0 ){
-    return await sendLDESRequest("http://mu.semte.ch/streams/", formatFn(data));
-  } else {
-    console.log("no data to post");
-  }
-};
 
 /*
  * insert the status of posted data.
