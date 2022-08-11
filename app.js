@@ -37,7 +37,7 @@ const pollData = async () => {
      }
    }`;
   const result = (await query(queryString)).results.bindings;
-  return result; 
+  return result.filter(x => (x.label!==undefined && (!x.label.value.tolowercase().includes("published") || x.label.value.tolowercase().includes("sent"))) || (x.label == undefined )); 
 };
 
 /*
@@ -80,7 +80,7 @@ const  updatePostedData = async (postedData) => {
       return postedData;
     } else {
     const sentUri = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
-    const quadString = postedData.filter( (e) =>  e.puburi==undefined)
+    const insertQuadString = postedData
       .map( (e) => {
         return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
           ${sparqlEscapeUri(e.status.value)} schema:publication ${sentUri};
@@ -89,7 +89,7 @@ const  updatePostedData = async (postedData) => {
       }).join("\n");
     const resp = await update(`${prefixes}
                               INSERT DATA {
-                                ${quadString}
+                                ${insertQuadString}
                               }`);
     return resp.results.bindings;
     }
