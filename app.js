@@ -24,7 +24,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de
 const pollData = async () => {
    const queryString = `
    ${prefixes}
-   SELECT ?graph  ?status  ?label } WHERE {
+   SELECT ?graph  ?status  ?label  WHERE {
      GRAPH ?graph{
        ?publicservice a cpsv:PublicService; adms:status ?status.
        OPTIONAL {
