@@ -29,14 +29,14 @@ const pollData = async () => {
    const extraVariables = Object.keys(extraPropertiesDict).map(e=>"?"+e);
    const queryString = `
    ${prefixes}
-   select ?publicservice ?status ?puburi ?label ${extraVariables.join(" ")} where {
+   select ?graph ?publicservice ?status ?puburi ?label ${extraVariables.join(" ")} where {
      graph ?graph{
        ?publicservice a cpsv:PublicService; adms:status ?status.
-      OPTIONAL {
-       ?publicservice ${propertiesString}.
+       OPTIONAL {
+         ?publicservice ${propertiesString}.
        }
-      OPTIONAL {
-       ?status schema:publication ?puburi; skos:preflabel ?label.
+       OPTIONAL {
+         ?status schema:publication ?puburi; skos:preflabel ?label.
        }
      }
    }`;
@@ -83,17 +83,31 @@ const  updatePostedData = async (postedData) => {
       console.log("No data to update");
       return postedData;
     } else {
+
     const insertQuadString = postedData
       .map( (e) => {
         return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
+          ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
           ${sparqlEscapeUri(e.status.value)} schema:publication ${sparqlEscapeUri(SENT_URI)};
                 skos:prefLabel "Published to app-digitaal-loket-ldes-feed".
         }`;
       }).join("\n");
+
+    const deleteQuadString = postedData
+      .map( e=> {
+        return `GRAPH ${sparqlEscapeUri(e.graph.value)}{
+          ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(e.status.value)}.
+          }`;
+      });
+
     const resp = await update(`${prefixes}
                               INSERT DATA {
                                 ${insertQuadString}
-                              }`);
+                              }
+                              DELETE DATA {
+                                ${deleteQuadString}
+                              }
+    `);
     return resp.results.bindings;
     }
 };
