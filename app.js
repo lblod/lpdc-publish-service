@@ -43,7 +43,6 @@ const pollData = async () => {
  * format request and send data to ldes feed
  */
 const  postDataToLDES = (formatFn) => (uri) => async (data) =>  {
-  if ( data.length > 0 ){
     body = formatFn(data);
     try{
       const queryParams = new URLSearchParams({
@@ -62,7 +61,6 @@ const  postDataToLDES = (formatFn) => (uri) => async (data) =>  {
       console.log(e);
       throw e;
     }
-  }
 }
 
 
@@ -97,14 +95,18 @@ const  updatePostedData = async (postedData) => {
 const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
-    const response = await postDataToLDES(bindingsToNT)(STREAM_URI)(polledData);
+    if (polledData.length > 0 ){
+      const response = await postDataToLDES(bindingsToNT)(STREAM_URI)(polledData);
     // if error in ldes-proxy
-    if (response.status >=400) {
-      console.log("error while posting data to ldes");
-      console.log(response);
+      if (response.status >=400) {
+        console.log("error while posting data to ldes");
+        console.log(response);
+      } else{
+        // update polled triples
+        const endResult = await updatePostedData(polledData);
+      }
     } else{
-      // update polled triples
-      const endResult = await updatePostedData(polledData);
+      console.log("no data to post");
     }
   } catch(e){
     console.log(e);
