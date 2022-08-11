@@ -2,11 +2,13 @@ import { app, errorHandler, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import fetch  from 'node-fetch';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
+import { bindingsToNT } from "./utils/bindingsToNT";
 import { prefixes } from "./prefixes";
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
   LDES_FOLDER,
+  STREAM_URI
 } from './env-config'
 
 
@@ -106,22 +108,11 @@ const  updatePostedData = async (postedData) => {
     }
 };
 
-const polledDataToRDF = (dataDict) => (data) => {
-  const fieldToString = (field) => field.type=="uri"?`${sparqlEscapeUri(field.value)}`:`"${field.value}"`;
-  const result = data.map(triple =>
-    `${fieldToString(triple["publicservice"])} `+
-    Object.keys(triple).filter(k=> dataDict[k])
-      .map(k => `${dataDict[k]} ${fieldToString(triple[k])}`)
-      .join("; ")+"."
-  ).join("\n") ;
-  return prefixes.replace(/PREFIX/g, "@prefix").replace(/\n/g,".\n")+result;
-}
 
 const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
-    const formatPolledData = polledDataToRDF({...propertiesDict, ...extraPropertiesDict});
-    const response = await postDataToLDES(formatPolledData)(polledData);
+    const response = await postDataToLDES(bindingsToNT)(STREAM_URI)(polledData);
     // if error in ldes-proxy
     if (response.status >=400) {
       console.log("error while posting data to ldes");
