@@ -61,7 +61,7 @@ async function sendLDESRequest(uri, body) {
       },
       body: body,
     });
-    return result.status;
+    return result;
   } catch (e) {
     console.log(e);
   }
@@ -127,10 +127,11 @@ const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
     const formatPolledData = polledDataToRDF({...propertiesDict, ...extraPropertiesDict});
-    const codeRequest = await postDataToLDES(formatPolledData)(polledData);
+    const response = await postDataToLDES(formatPolledData)(polledData);
     // if error in ldes-proxy
-    if (codeRequest >=400) {
-      console.log(" error while posting data to ldes");
+    if (response.status >=400) {
+      console.log("error while posting data to ldes");
+      console.log(response);
     } else{
       // update polled triples
       const endResult = await updatePostedData(polledData);
