@@ -13,35 +13,29 @@ import {
 const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
 const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
 
-const propertiesDict = { "status":"adms:status", "label":"skos:prefLabel", "puburi":"schema:publication"};
 
 // to add predicates in the request
-const extraProperties = [ "purl:title", "purl:source"]
-const extraPropertiesEntries = extraProperties.map(e=> [ e.split(":").slice(-1)[0], e]);
-const extraPropertiesDict = Object.fromEntries(extraPropertiesEntries);
 
 /*
  * Poll data from any graphs 
  *
  */
 const pollData = async () => {
-   const propertiesString = extraPropertiesEntries.map(e=>e.reverse().join(" ?")).join(";")
-   const extraVariables = Object.keys(extraPropertiesDict).map(e=>"?"+e);
    const queryString = `
    ${prefixes}
-   select ?graph ?publicservice ?status ?puburi ?label ${extraVariables.join(" ")} where {
-     graph ?graph{
+   SELECT ?graph  ?status  ?label } WHERE {
+     GRAPH ?graph{
        ?publicservice a cpsv:PublicService; adms:status ?status.
-       OPTIONAL {
-         ?publicservice ${propertiesString}.
-       }
        OPTIONAL {
          ?status schema:publication ?puburi; skos:preflabel ?label.
        }
      }
+     FILTER NOT EXISTS{
+      ?status schema:publication ?puburi.
+     }
    }`;
   const result = (await query(queryString)).results.bindings;
-  return result.filter(x => (x.label!==undefined && (!x.label.value.tolowercase().includes("published") || x.label.value.tolowercase().includes("sent"))) || (x.label == undefined )); 
+  return result;
 };
 
 /*
