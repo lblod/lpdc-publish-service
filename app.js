@@ -9,6 +9,10 @@ import {
   LDES_FOLDER,
 } from './env-config'
 
+
+const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
+
 const propertiesDict = { "status":"adms:status", "label":"skos:prefLabel", "puburi":"schema:publication"};
 
 // to add predicates in the request
@@ -96,7 +100,7 @@ const  updatePostedData = async (postedData) => {
 };
 
 const polledDataToRDF = (dataDict) => (data) => {
-  const fieldToString = (field) => field.type=="uri"?`<${field.value}>`:`"field.value"`;
+  const fieldToString = (field) => field.type=="uri"?`${sparqlEscapeUri(field.value)}`:`"${field.value}"`;
   const result = data.map(triple =>
     `${fieldToString(triple["publicservice"])} `+
     Object.keys(triple).filter(k=> dataDict[k])
