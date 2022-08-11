@@ -72,13 +72,10 @@ const  updatePostedData = async (postedData) => {
       console.log("No data to update");
       return postedData;
     } else {
-
-    const insertQuadString = postedData
-      .map( (e) => {
-        return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
-          ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
-          ${sparqlEscapeUri(e.status.value)} schema:publication ${sparqlEscapeUri(SENT_URI)};
-                skos:prefLabel "Published to app-digitaal-loket-ldes-feed".
+    const insertQuadString = postedData.map( (e) => {
+      return `GRAPH ${sparqlEscapeUri(e.graph.value)} {
+                ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+                ${sparqlEscapeUri(e.status.value)} schema:publication ${sparqlEscapeUri(SENT_URI)}.
         }`;
       }).join("\n");
 
