@@ -2,7 +2,7 @@ import { app, errorHandler, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import fetch  from 'node-fetch';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
-import { bindingsToNT } from "./utils/bindingsToNT";
+import { bindingsToTTL } from "./utils/bindingsToNT";
 import { prefixes } from "./prefixes";
 import {
   CRON_PATTERN,
@@ -24,7 +24,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de
 const pollData = async () => {
    const queryString = `
    ${prefixes}
-   SELECT ?graph  ?status  ?label  WHERE {
+   SELECT  ?publicservice ?status  ?label  WHERE {
      GRAPH ?graph{
        ?publicservice a cpsv:PublicService; adms:status ?status.
        OPTIONAL {
@@ -43,7 +43,7 @@ const pollData = async () => {
  * format request and send data to ldes feed
  */
 const  postDataToLDES = (formatFn) => (uri) => async (data) =>  {
-    body = formatFn(data);
+    const body = formatFn(data);
     try{
       const queryParams = new URLSearchParams({
         resource: uri,
@@ -96,7 +96,7 @@ const pollingJob = new CronJob( CRON_PATTERN, async () => {
   try{
     const polledData = await pollData();
     if (polledData.length > 0 ){
-      const response = await postDataToLDES(bindingsToNT)(STREAM_URI)(polledData);
+      const response = await postDataToLDES(bindingsToTTL)(STREAM_URI)(polledData);
     // if error in ldes-proxy
       if (response.status >=400) {
         console.log("error while posting data to ldes");
