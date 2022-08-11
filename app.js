@@ -83,11 +83,10 @@ const  updatePostedData = async (postedData) => {
       console.log("No data to update");
       return postedData;
     } else {
-    const sentUri = "<http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2>";
     const insertQuadString = postedData
       .map( (e) => {
         return `GRAPH  ${sparqlEscapeUri(e.graph.value)} {
-          ${sparqlEscapeUri(e.status.value)} schema:publication ${sentUri};
+          ${sparqlEscapeUri(e.status.value)} schema:publication ${sparqlEscapeUri(SENT_URI)};
                 skos:prefLabel "Published to app-digitaal-loket-ldes-feed".
         }`;
       }).join("\n");
