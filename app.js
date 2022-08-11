@@ -24,7 +24,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de
 const pollData = async () => {
    const queryString = `
    ${prefixes}
-   SELECT  ?publicservice ?status  ?label  WHERE {
+   SELECT ?graph ?publicservice ?status  ?label  WHERE {
      GRAPH ?graph{
        ?publicservice a cpsv:PublicService; adms:status ?status.
        OPTIONAL {
@@ -76,7 +76,7 @@ const  updatePostedData = async (postedData) => {
       return `GRAPH ${sparqlEscapeUri(e.graph.value)} {
                 ${sparqlEscapeUri(e.publicservice.value)} adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
                 ${sparqlEscapeUri(e.status.value)} schema:publication ${sparqlEscapeUri(SENT_URI)}.
-        }`;
+              }`;
       }).join("\n");
 
 
