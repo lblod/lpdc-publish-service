@@ -14,7 +14,7 @@ import { getPublicServiceDetails } from './queries';
 // - move this.
 // - add label STATUS_PUBLISHED_URI, with migration
 const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
-const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
+const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
 
 /*
  * TODO: move to queries
@@ -25,8 +25,8 @@ async function getUnpublishedServices() {
    ${prefixes}
    SELECT DISTINCT ?publicservice WHERE {
      GRAPH ?graph {
-       ?publicservice a cpsv:PublicService.
-
+       ?publicservice a cpsv:PublicService;
+         adms:status ${sparqlEscapeUri(SENT_URI)}.
      }
      FILTER NOT EXISTS{
       ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
