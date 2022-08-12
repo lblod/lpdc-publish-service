@@ -10,10 +10,14 @@ import {
 } from './env-config';
 import { getPublicServiceDetails } from './queries';
 
+//TODO:
+// - move this.
+// - add label STATUS_PUBLISHED_URI, with migration
 const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
 const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
 
 /*
+ * TODO: move to queries
  * Poll data from any graphs
  */
 async function getUnpublishedServices() {
@@ -60,6 +64,7 @@ async function postDataToLDES(uri, body) {
 }
 
 /*
+ * TODO: move to queries
  * update the status of posted data.
  */
 async function updateStatusPublicService(uri) {
