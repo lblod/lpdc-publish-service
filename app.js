@@ -2,18 +2,22 @@ import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import fetch  from 'node-fetch';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
-import { bindingsToTTL } from "./utils/bindingsToNT";
 import { prefixes } from "./prefixes";
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
   LDES_FOLDER,
 } from './env-config';
+import { getPublicServiceDetails } from './queries';
 
+//TODO:
+// - move this.
+// - add label STATUS_PUBLISHED_URI, with migration
 const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
-const SENT_URI = "http://lblod.data.gift/concepts/43cee0c6-2a9f-4836-ba3c-5e80de5714f2";
+const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
 
 /*
+ * TODO: move to queries
  * Poll data from any graphs
  */
 async function getUnpublishedServices() {
@@ -21,8 +25,8 @@ async function getUnpublishedServices() {
    ${prefixes}
    SELECT DISTINCT ?publicservice WHERE {
      GRAPH ?graph {
-       ?publicservice a cpsv:PublicService.
-
+       ?publicservice a cpsv:PublicService;
+         adms:status ${sparqlEscapeUri(SENT_URI)}.
      }
      FILTER NOT EXISTS{
       ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
@@ -60,6 +64,7 @@ async function postDataToLDES(uri, body) {
 }
 
 /*
+ * TODO: move to queries
  * update the status of posted data.
  */
 async function updateStatusPublicService(uri) {
@@ -91,8 +96,12 @@ new CronJob( CRON_PATTERN, async () => {
 
     for(const service of unpublishedServices) {
       try {
-        await postDataToLDES(service.publicservice.value,
-                             `${sparqlEscapeUri(service.publicservice.value)} <http://foo> <http://bar>.`);
+        const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
+
+        for(const entry of subjectsAndData) {
+          await postDataToLDES(entry.subject, entry.body);
+        }
+
         await updateStatusPublicService(service.publicservice.value);
 
         console.log(`Successfully published ${service.publicservice.value}`);

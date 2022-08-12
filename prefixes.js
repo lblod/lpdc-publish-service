@@ -1,13 +1,23 @@
-export const prefixes = `PREFIX prov:  <http://www.w3.org/ns/prov#>
-PREFIX purl:  <http://purl.org/dc/terms/>
-PREFIX cpsv:  <http://purl.org/vocab/cpsv#>
-PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX adms:  <http://www.w3.org/ns/adms#>
-PREFIX vocab: <http://vocab.belgif.be/ns/publicservice#>
-PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-PREFIX schema: <http://schema.org/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-`;
-
-
+export const prefixes = `
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX ns1: <http://data.lblod.info/vocabularies/lpdc-ipdc/>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+  PREFIX cpsv: <http://purl.org/vocab/cpsv#>
+  PREFIX dct: <http://purl.org/dc/terms/>
+  PREFIX lpdcExt: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
+  PREFIX xkos: <http://rdf-vocabulary.ddialliance.org/xkos#>
+  PREFIX m8g: <http://data.europa.eu/m8g/>
+  PREFIX lblodLpdc: <http://data.lblod.info/id/public-services/>
+  PREFIX lblodIpdcLpdc: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
+  PREFIX dcat: <http://www.w3.org/ns/dcat#>
+  PREFIX lang: <http://publications.europa.eu/resource/authority/language/>
+  PREFIX lblodOrg: <http://data.lblod.info/id/concept/organisatie/>
+  PREFIX lblodIpdcThema: <http://data.lblod.info/id/concept/ipdc-thema/>
+  PREFIX belgif: <http://vocab.belgif.be/ns/publicservice#>
+  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+  PREFIX schema: <http://schema.org/>
+  PREFIX adms: <http://www.w3.org/ns/adms#>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  PREFIX ps: <http://vocab.belgif.be/ns/publicservice#>
+  PREFIX locn: <http://www.w3.org/ns/locn>`;
