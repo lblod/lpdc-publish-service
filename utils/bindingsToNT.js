@@ -1,9 +1,5 @@
 import { sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
-export function bindingsToTTL(bindings){
-  return bindings.reduce((p,c) => `${p}\n${_bindingToNT(c["publicservice"], {value:"adms:status"}, c["status"])}\n`,"")
-}
-
 export function bindingsToNT(bindings) {
   return bindings.map(b => _bindingToNT(b['s'], b['p'], b['o']));
 }
