@@ -3,6 +3,57 @@ import { sparqlEscapeUri } from 'mu';
 import { querySudo as query } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
 
+//TODO:
+// - add label STATUS_PUBLISHED_URI, with migration
+const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
+
+/*
+ * Poll data from any graphs
+ */
+export async function getUnpublishedServices() {
+   const queryString = `
+   ${prefixes}
+   SELECT DISTINCT ?publicservice WHERE {
+     GRAPH ?graph {
+       ?publicservice a cpsv:PublicService;
+         adms:status ${sparqlEscapeUri(SENT_URI)}.
+     }
+     FILTER NOT EXISTS{
+      ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+     }
+   }`;
+  const result = (await query(queryString)).results.bindings;
+  return result;
+};
+
+/*
+ * TODO: move to queries
+ * update the status of posted data.
+ */
+export async function updateStatusPublicService(uri) {
+  const statusUpdate = `
+  ${prefixes}
+
+  INSERT {
+    GRAPH ?g {
+      ?service schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+    }
+  }
+  WHERE {
+    BIND(${sparqlEscapeUri(uri)} as ?service)
+    GRAPH ?g {
+     ?service a cpsv:PublicService.
+    }
+  }
+  `;
+  const resp = await update(statusUpdate);
+  return resp.results.bindings;
+
+};
+
+
+
 export async function getPublicServiceDetails( publicServiceUri ) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const results = [];
