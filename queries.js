@@ -226,14 +226,18 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
       CONSTRUCT {
          ?s a foaf:Document;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?document;
+          dct:title ?title.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           lpdcExt:attachment ?s.
          ?s a foaf:Document;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?document;
+          dct:title ?title.
       }`;
   const documentData = await query(documentQuery);
 
