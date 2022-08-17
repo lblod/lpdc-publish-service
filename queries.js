@@ -79,72 +79,171 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     }
   );
 
-  //get the remaining data
-  const relationQuery = `
+  const evidenceQuery = `
     ${prefixes}
-    SELECT DISTINCT ?s ?p ?o
+    CONSTRUCT {
+     ?evidence a m8g:Evidence;
+          ?p ?o.
+    }
     WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-      {
         ?service a cpsv:PublicService;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
-          m8g:hasSupportingEvidence ?s.
-        ?s a m8g:Evidence;
+          m8g:hasSupportingEvidence ?evidence.
+        ?evidence a m8g:Evidence;
+          ?p ?o.
+    }`;
+
+  const evidenceData = await query(evidenceQuery);
+
+  const requirementQuery = `
+  ${prefixes}
+  CONSTRUCT {
+        ?s a m8g:Requirement;
           ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           ?p ?o.
+      }`;
+  const requirementData = await query(requirementQuery);
+
+  const websiteOnlineProcedureQuery = `
+  ${prefixes}
+  CONSTRUCT {
+        ?s a schema:Website;
+          ?p ?o.
+      }`;
+  const requirementData = await query(requirementQuery);
+
+  const websiteOnlineProcedureQuery = `
+  ${prefixes}
+  CONSTRUCT {
+        ?s a schema:Website;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
           lpdcExt:hasOnlineProcedure ?s.
         ?s a schema:Website;
           ?p ?o.
+      }`;
+  const websiteOnlineProcedureData = await query(websiteOnlineProcedureQuery);
+
+  const procedureQuery = `
+  ${prefixes}
+  CONSTRUCT {
+        ?s a cpsv:Rule;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           ?p ?o.
+      }`
+  const procedureData = await query(procedureQuery);
+
+
+  const costQuery = `
+  ${prefixes}
+      CONSTRUCT {
+        ?s a m8g:Cost;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           ?p ?o.
+      }`;
+  const costData = await query(costQuery);
+
+
+  const financialAdvantageQuery = `
+  ${prefixes}
+      CONSTRUCT {
+        ?s a lpdcExt:FinancialAdvantage;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:produces ?s.
          ?s a lpdcExt:FinancialAdvantage;
           ?p ?o.
-      }
-      UNION {
+      }`;
+  const financialAdvantageData = await query(financialAdvantageQuery);
+
+
+  const contactPointQuery = `
+  ${prefixes}
+       CONSTRUCT {
+         ?s a schema:ContactPoint;
+          ?p ?o.
+       }
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint;
           ?p ?o.
+      }`;
+  const contactPointData = await query(contactPointQuery);
+
+  const documentQuery = `
+  ${prefixes}
+      CONSTRUCT {
+         ?s a foaf:Document;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           lpdcExt:attachment ?s.
          ?s a foaf:Document;
           ?p ?o.
+      }`;
+  const documentData = await query(documentQuery);
+
+
+
+  const websiteQuery = `
+  ${prefixes}
+      CONSTRUCT {
+        ?s a schema:Website;
+          ?p ?o.
+      }`;
+  const documentData = await query(documentQuery);
+
+
+
+  const websiteQuery = `
+  ${prefixes}
+      CONSTRUCT {
+        ?s a schema:Website;
+          ?p ?o.
       }
-      UNION {
+      WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           rdfs:seeAlso ?s.
         ?s a schema:Website;
           ?p ?o.
-      }
-    }
-  `;
+      }`;
+  const websiteData = await query(websiteQuery);
+
+  // get the remaining data
+  const relationQuery = "";
 
   const relationsResult = await query(relationQuery);
 
