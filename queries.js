@@ -83,7 +83,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     ${prefixes}
     CONSTRUCT {
      ?evidence a m8g:Evidence;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
     }
     WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
@@ -92,7 +93,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?requirement a m8g:Requirement;
           m8g:hasSupportingEvidence ?evidence.
         ?evidence a m8g:Evidence;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
     }`;
 
   const evidenceData = await query(evidenceQuery);
@@ -101,14 +103,18 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
   CONSTRUCT {
         ?s a m8g:Requirement;
-          ?p ?o.
+          dct:description ?description;
+          m8g:hasSupportingEvidence ?hasSupportingEvidence;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
-          ?p ?o.
+          dct:description ?description;
+          m8g:hasSupportingEvidence ?hasSupportingEvidence;
+          dct:title ?name.
       }`;
   const requirementData = await query(requirementQuery);
 
@@ -141,14 +147,18 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
   CONSTRUCT {
         ?s a cpsv:Rule;
-          ?p ?o.
+          ipdclpdc:hasWebsites ?hasWebsites;
+          dct:description ?description;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
-          ?p ?o.
+          ipdclpdc:hasWebsites ?hasWebsites;
+          dct:description ?description;
+          dct:title ?name.
       }`
   const procedureData = await query(procedureQuery);
 
@@ -157,14 +167,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
       CONSTRUCT {
         ?s a m8g:Cost;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
       }`;
   const costData = await query(costQuery);
 
@@ -173,14 +185,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
       CONSTRUCT {
         ?s a lpdcExt:FinancialAdvantage;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:produces ?s.
          ?s a lpdcExt:FinancialAdvantage;
-          ?p ?o.
+          dct:description ?description;
+          dct:title ?name.
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
 
@@ -189,14 +203,22 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
        CONSTRUCT {
          ?s a schema:ContactPoint;
-          ?p ?o.
+          ipdclpdc:address ?address;
+          schema:email ?hasEmail;
+          schema:telephone ?hasTelephone;
+          schema:openingHours ?openingHours;
+          schema:url ?website.
        }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint;
-          ?p ?o.
+          ipdclpdc:address ?address;
+          schema:email ?hasEmail;
+          schema:telephone ?hasTelephone;
+          schema:openingHours ?openingHours;
+          schema:url ?website.
       }`;
   const contactPointData = await query(contactPointQuery);
 
