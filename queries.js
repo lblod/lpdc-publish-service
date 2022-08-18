@@ -82,7 +82,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const evidenceQuery = `
     ${prefixes}
     CONSTRUCT {
-     ?evidence a m8g:Evidence;
+     ?s a m8g:Evidence;
           dct:description ?description;
           dct:title ?name.
     }
@@ -91,8 +91,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?service a cpsv:PublicService;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
-          m8g:hasSupportingEvidence ?evidence.
-        ?evidence a m8g:Evidence;
+          m8g:hasSupportingEvidence ?s.
+        ?s a m8g:Evidence;
           dct:description ?description;
           dct:title ?name.
     }`;
