@@ -134,12 +134,13 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           ?p ?o.
       }`;
   const websiteOnlineProcedureData = await query(websiteOnlineProcedureQuery);
+  resultBindings.push(websiteOnlineProcedureData.results.bindings);
 
   const procedureQuery = `
   ${prefixes}
   CONSTRUCT {
         ?s a cpsv:Rule;
-          ipdclpdc:hasWebsites ?hasWebsites;
+          lpdcExt:hasWebsites ?hasWebsites;
           dct:description ?description;
           dct:title ?name.
       }
@@ -148,7 +149,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?service a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
-          ipdclpdc:hasWebsites ?hasWebsites;
+          lpdcExt:hasWebsites ?hasWebsites;
           dct:description ?description;
           dct:title ?name.
       }`
@@ -195,7 +196,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
        CONSTRUCT {
          ?s a schema:ContactPoint;
-          ipdclpdc:address ?address;
+          lpdcExt:address ?address;
           schema:email ?hasEmail;
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
@@ -206,7 +207,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?service a cpsv:PublicService;
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint;
-          ipdclpdc:address ?address;
+          lpdcExt:address ?address;
           schema:email ?hasEmail;
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
