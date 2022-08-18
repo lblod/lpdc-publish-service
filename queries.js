@@ -79,6 +79,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     }
   );
 
+  const resultBindings=[];
   const evidenceQuery = `
     ${prefixes}
     CONSTRUCT {
@@ -98,6 +99,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     }`;
 
   const evidenceData = await query(evidenceQuery);
+  resultBindings.push(evidenceData.results.bindings);
 
   const requirementQuery = `
   ${prefixes}
@@ -117,6 +119,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }`;
   const requirementData = await query(requirementQuery);
+  resultBindings.push(requirementData.results.bindings);
 
   const websiteOnlineProcedureQuery = `
   ${prefixes}
@@ -158,6 +161,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }`
   const procedureData = await query(procedureQuery);
+  resultBindings.push(procedureData.results.bindings);
 
 
   const costQuery = `
@@ -176,6 +180,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }`;
   const costData = await query(costQuery);
+  resultBindings.push(costData.results.bindings);
 
 
   const financialAdvantageQuery = `
@@ -194,6 +199,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
+  resultBindings.push(financialAdvantageData.results.bindings);
 
 
   const contactPointQuery = `
@@ -218,6 +224,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:url ?website.
       }`;
   const contactPointData = await query(contactPointQuery);
+  resultBindings.push(contactPointData.results.bindings);
 
   const documentQuery = `
   ${prefixes}
@@ -237,6 +244,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?title.
       }`;
   const documentData = await query(documentQuery);
+  resultBindings.push(documentData.results.bindings);
 
 
   const websiteQuery = `
@@ -257,6 +265,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }`;
   const websiteData = await query(websiteQuery);
+  resultBindings.push(websiteData.results.bindings);
 
   // get the remaining data
   const relationQuery = "";
