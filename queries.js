@@ -268,9 +268,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   resultBindings.push(websiteData.results.bindings);
 
   // create object to be send : {subject : s.value , body : processedBindings }
-  const resultObjects = resultBindings.map((bindings) => ({ subject: bindings.s.value,
-    body: bindingsToNT(bindings).join("\r\n")}
-  ));
+  const resultObjects = resultBindings.filter(bindings => bindings.s != undefined)
+  .map((bindings) => ({ subject: bindings.s.value, body: bindingsToNT(bindings).join("\r\n")}));
 
   // get the remaining data
   const relationQuery = "";
