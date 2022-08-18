@@ -267,6 +267,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
+  // create object to be send : {subject : s.value , body : processedBindings }
+  const resultObjects = resultBindings.map((bindings) => ({ subject: bindings.s.value,
+    body: bindingsToNT(bindings).join("\r\n")}
+  ));
+
   // get the remaining data
   const relationQuery = "";
 
