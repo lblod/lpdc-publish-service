@@ -123,14 +123,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   CONSTRUCT {
         ?s a schema:Website;
           ?p ?o.
-      }`;
-  const requirementData = await query(requirementQuery);
-
-  const websiteOnlineProcedureQuery = `
-  ${prefixes}
-  CONSTRUCT {
-        ?s a schema:Website;
-          ?p ?o.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
@@ -240,17 +232,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?title.
       }`;
   const documentData = await query(documentQuery);
-
-
-
-  const websiteQuery = `
-  ${prefixes}
-      CONSTRUCT {
-        ?s a schema:Website;
-          ?p ?o.
-      }`;
-  const documentData = await query(documentQuery);
-
 
 
   const websiteQuery = `
