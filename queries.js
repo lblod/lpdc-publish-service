@@ -122,16 +122,20 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
   CONSTRUCT {
         ?s a schema:Website;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?location;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
-          lpdcExt:hasOnlineProcedure ?s.
+          lpdcExt:hasWebsite ?s.
         ?s a schema:Website;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?location;
+          dct:title ?name.
       }`;
   const websiteOnlineProcedureData = await query(websiteOnlineProcedureQuery);
   resultBindings.push(websiteOnlineProcedureData.results.bindings);
@@ -239,14 +243,18 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
       CONSTRUCT {
         ?s a schema:Website;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?location;
+          dct:title ?name.
       }
       WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           rdfs:seeAlso ?s.
         ?s a schema:Website;
-          ?p ?o.
+          dct:description ?description;
+          schema:url ?location;
+          dct:title ?name.
       }`;
   const websiteData = await query(websiteQuery);
 
