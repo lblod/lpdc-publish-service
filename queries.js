@@ -260,9 +260,13 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
-  // create object to be send : {subject : s.value , body : processedBindings }
-  const resultObjects = resultBindings.filter(bindings => bindings.s != undefined)
-  .map((bindings) => ({ subject: bindings.s.value, body: bindingsToNT(bindings).join("\r\n")}));
+  const notEmptyResults = resultBindings.filter(bindings => bindings.s != undefined);
 
-  return results;
+  const resultsObjects = createResultObject(notEmptyResults);
+
+  return [...results, ...resultsObjects];
+}
+
+// Takes a list of results and returns a list of objects ready to be sent
+function createResultObject(resultList, queryData){
 }
