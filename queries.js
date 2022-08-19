@@ -28,7 +28,6 @@ export async function getUnpublishedServices() {
 };
 
 /*
- * TODO: move to queries
  * update the status of posted data.
  */
 export async function updateStatusPublicService(uri) {
