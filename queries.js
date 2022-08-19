@@ -270,23 +270,5 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const resultObjects = resultBindings.filter(bindings => bindings.s != undefined)
   .map((bindings) => ({ subject: bindings.s.value, body: bindingsToNT(bindings).join("\r\n")}));
 
-  // get the remaining data
-  const relationQuery = "";
-
-  const relationsResult = await query(relationQuery);
-
-  //some mediocre post postprocessing to extract all unique subjects
-  const relatedSubjects = [ ...new Set(relationsResult.results.bindings.map(result => result.s.value)) ];
-
-  const relationsBody = bindingsToNT(relationsResult.results.bindings).join("\r\n");
-
-  for(const subject of relatedSubjects) {
-    results.push({
-      subject,
-      //TODO: this will send every time the same body again, with a different resource to process. this is suboptimal
-      body: relationsBody,
-    });
-  }
-
   return results;
 }
