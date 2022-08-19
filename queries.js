@@ -52,7 +52,6 @@ export async function updateStatusPublicService(uri) {
 };
 
 
-
 export async function getPublicServiceDetails( publicServiceUri ) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const results = [];
@@ -96,7 +95,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:description ?description;
           dct:title ?name.
     }`;
-
   const evidenceData = await query(evidenceQuery);
   resultBindings.push(evidenceData.results.bindings);
 
@@ -162,7 +160,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const procedureData = await query(procedureQuery);
   resultBindings.push(procedureData.results.bindings);
 
-
   const costQuery = `
   ${prefixes}
       CONSTRUCT {
@@ -181,7 +178,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const costData = await query(costQuery);
   resultBindings.push(costData.results.bindings);
 
-
   const financialAdvantageQuery = `
   ${prefixes}
       CONSTRUCT {
@@ -199,7 +195,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
   resultBindings.push(financialAdvantageData.results.bindings);
-
 
   const contactPointQuery = `
   ${prefixes}
@@ -244,7 +239,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       }`;
   const documentData = await query(documentQuery);
   resultBindings.push(documentData.results.bindings);
-
 
   const websiteQuery = `
   ${prefixes}
