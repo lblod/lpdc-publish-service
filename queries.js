@@ -269,4 +269,20 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 
 // Takes a list of results and returns a list of objects ready to be sent
 function createResultObject(resultList, queryData){
+  const  r = {};
+  for(let result of resultList){
+      const triples = bindingsToNT(result).join('\r\n')+"\r\n";
+      const subject = result.s;
+      if (r[subject] == undefined){
+        //create subject
+        r[subject] = {
+          subject: subject,
+          body: ""
+        };
+      }
+      //add triples to body
+      const newTriples = r[subject].body +"\r\n"+triples;
+      r[subject].body = newTriples;
+  }
+  return Object.values(r);
 }
