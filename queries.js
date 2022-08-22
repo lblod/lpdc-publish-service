@@ -282,7 +282,7 @@ function createResultObject(resultList, queryData){
       }
       //add triples to body
       const newTriples = r[subject].body +"\r\n"+triples;
-      r[subject].body = newTriples;
+      r[subject].body += newTriples;
   }
   return Object.values(r);
 }
