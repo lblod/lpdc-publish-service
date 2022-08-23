@@ -267,27 +267,27 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 }
 
 /*
-  * Takes a list of results and returns a list of objects ready to be sent
+  * Takes a list of bindings and returns a list of objects ready to be sent
   * Group the results by subject.
   */
-function createResultObject(resultList, queryData){
-  const  r = {};
-  for(let result of resultList){
+function createResultObject(bindingsList){
+  const  resultObject = {};
+  for(let bindings of bindingsList){
     // ignore empty bindingSet
-    if (result.s != undefined){
-      const triples = bindingsToNT(result).join('\r\n')+"\r\n";
-      const subject = result.s;
-      if (r[subject] == undefined){
+    if (bindings.s != undefined){
+      const triples = bindingsToNT(bindings).join('\r\n')+"\r\n";
+      const subject = bindings.s;
+      if (resultObject[subject] == undefined){
         //create subject
-        r[subject] = {
+        resultObject[subject] = {
           subject: subject,
           body: ""
         };
       }
       //add triples to body
-      const newTriples = r[subject].body +"\r\n"+triples;
-      r[subject].body += newTriples;
+      const newTriples = resultObject[subject].body +"\r\n"+triples;
+      resultObject[subject].body += newTriples;
     }
   }
-  return Object.values(r);
+  return Object.values(resultObject);
 }
