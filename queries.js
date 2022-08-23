@@ -54,7 +54,8 @@ export async function updateStatusPublicService(uri) {
 
 export async function getPublicServiceDetails( publicServiceUri ) {
   //we make a intermediate data structure to ease posting to ldes endpoint
-  const results = [];
+  const resultBindings=[];
+
   const publicServiceQuery = `
     ${prefixes}
 
@@ -66,18 +67,9 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       }
     }
   `;
-
   const queryResult = await query(publicServiceQuery);
-  const publicServiceBody = bindingsToNT(queryResult.results.bindings).join("\r\n");
+  resultBindings.push(queryResult.results.bindings);
 
-  results.push(
-    {
-      subject: publicServiceUri,
-      body: publicServiceBody,
-    }
-  );
-
-  const resultBindings=[];
   const evidenceQuery = `
     ${prefixes}
     CONSTRUCT {
@@ -260,10 +252,9 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
+  const results = createResultObject(resultBindings);
 
-  const resultsObjects = createResultObject(notEmptyResults);
-
-  return [...results, ...resultsObjects];
+  return results;
 }
 
 /*
