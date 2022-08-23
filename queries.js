@@ -267,7 +267,10 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   return [...results, ...resultsObjects];
 }
 
-// Takes a list of results and returns a list of objects ready to be sent
+/*
+  * Takes a list of results and returns a list of objects ready to be sent
+  * Group the results by subject.
+  */
 function createResultObject(resultList, queryData){
   const  r = {};
   for(let result of resultList){
