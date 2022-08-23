@@ -260,7 +260,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
-  const notEmptyResults = resultBindings.filter(bindings => bindings.s != undefined);
 
   const resultsObjects = createResultObject(notEmptyResults);
 
@@ -274,6 +273,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 function createResultObject(resultList, queryData){
   const  r = {};
   for(let result of resultList){
+    // ignore empty bindingSet
+    if (result.s != undefined){
       const triples = bindingsToNT(result).join('\r\n')+"\r\n";
       const subject = result.s;
       if (r[subject] == undefined){
@@ -286,6 +287,7 @@ function createResultObject(resultList, queryData){
       //add triples to body
       const newTriples = r[subject].body +"\r\n"+triples;
       r[subject].body += newTriples;
+    }
   }
   return Object.values(r);
 }
