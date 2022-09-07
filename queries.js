@@ -1,6 +1,6 @@
 import { prefixes } from "./prefixes";
 import { sparqlEscapeUri } from 'mu';
-import { querySudo as query } from "@lblod/mu-auth-sudo";
+import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
 
 //TODO:
