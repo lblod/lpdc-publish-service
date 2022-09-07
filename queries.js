@@ -271,20 +271,13 @@ function createResultObject(bindingsList){
   const  resultObject = {};
   for(let bindings of bindingsList){
     // ignore empty bindingSet
-    if (bindings.s != undefined){
+    if (bindings.length){
       const triples = bindingsToNT(bindings).join('\r\n')+"\r\n";
-      const subject = bindings.s;
-      if (resultObject[subject] == undefined){
-        //create subject
-        resultObject[subject] = {
-          subject: subject,
-          body: ""
-        };
-      }
-      //add triples to body
-      const newTriples = resultObject[subject].body +"\r\n"+triples;
-      resultObject[subject].body += newTriples;
+      const subject = bindings[0].s.value;
+      resultObject[subject] = {
+        body: triples
+      };
     }
   }
-  return Object.values(resultObject);
+  return resultObject;
 }
