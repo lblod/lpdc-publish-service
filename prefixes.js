@@ -5,7 +5,6 @@ export const prefixes = `
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
   PREFIX cpsv: <http://purl.org/vocab/cpsv#>
   PREFIX dct: <http://purl.org/dc/terms/>
-  PREFIX lpdcExt: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
   PREFIX xkos: <http://rdf-vocabulary.ddialliance.org/xkos#>
   PREFIX m8g: <http://data.europa.eu/m8g/>
   PREFIX lblodLpdc: <http://data.lblod.info/id/public-services/>
@@ -20,4 +19,5 @@ export const prefixes = `
   PREFIX adms: <http://www.w3.org/ns/adms#>
   PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
   PREFIX ps: <http://vocab.belgif.be/ns/publicservice#>
+  PREFIX lpdcExt: <https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#>
   PREFIX locn: <http://www.w3.org/ns/locn>`;
