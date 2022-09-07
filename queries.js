@@ -54,7 +54,7 @@ export async function updateStatusPublicService(uri) {
 
 export async function getPublicServiceDetails( publicServiceUri ) {
   //we make a intermediate data structure to ease posting to ldes endpoint
-  const resultBindings=[];
+  const resultBindings = [];
 
   const publicServiceQuery = `
     ${prefixes}
