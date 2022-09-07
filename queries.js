@@ -99,13 +99,12 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           dct:description ?description;
-          m8g:hasSupportingEvidence ?hasSupportingEvidence;
           dct:title ?name.
+        OPTIONAL{ ?s m8g:hasSupportingEvidence ?hasSupportingEvidence. }
       }`;
   const requirementData = await query(requirementQuery);
   resultBindings.push(requirementData.results.bindings);
@@ -125,9 +124,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
         ?s a schema:Website;
-          dct:description ?description;
           schema:url ?location;
           dct:title ?name.
+
+        OPTIONAL { ?s dct:description ?description. }
+
       }`;
   const websiteOnlineProcedureData = await query(websiteOnlineProcedureQuery);
   resultBindings.push(websiteOnlineProcedureData.results.bindings);
@@ -145,9 +146,9 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?service a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
-          lpdcExt:hasWebsites ?hasWebsites;
           dct:description ?description;
           dct:title ?name.
+        OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsites. }
       }`;
   
   const procedureData = await query(procedureQuery);
@@ -182,9 +183,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           cpsv:produces ?s.
-         ?s a lpdcExt:FinancialAdvantage;
-          dct:description ?description;
-          dct:title ?name.
+
+       ?s a lpdcExt:FinancialAdvantage;
+            dct:title ?name.
+       OPTIONAL { ?s dct:description ?description. }
+
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
   resultBindings.push(financialAdvantageData.results.bindings);
@@ -203,12 +206,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
         ?service a cpsv:PublicService;
           m8g:hasContactPoint ?s.
-         ?s a schema:ContactPoint;
-          lpdcExt:address ?address;
-          schema:email ?hasEmail;
-          schema:telephone ?hasTelephone;
-          schema:openingHours ?openingHours;
-          schema:url ?website.
+         ?s a schema:ContactPoint.
+
+        OPTIONAL { ?s lpdcExt:address ?address. }
+        OPTIONAL { ?s schema:email ?hasEmail. }
+        OPTIONAL { ?s schema:telephone ?hasTelephone. }
+        OPTIONAL { ?s schema:openingHours ?openingHours. }
+        OPTIONAL { ?s schema:url ?website. }
+
       }`;
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
@@ -246,9 +251,9 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?service a cpsv:PublicService;
           rdfs:seeAlso ?s.
         ?s a schema:Website;
-          dct:description ?description;
           schema:url ?location;
           dct:title ?name.
+        OPTIONAL { ?s dct:description ?description. }
       }`;
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
