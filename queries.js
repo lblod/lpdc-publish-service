@@ -148,7 +148,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           lpdcExt:hasWebsites ?hasWebsites;
           dct:description ?description;
           dct:title ?name.
-      }`
+      }`;
+  
   const procedureData = await query(procedureQuery);
   resultBindings.push(procedureData.results.bindings);
 
