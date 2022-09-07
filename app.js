@@ -46,8 +46,8 @@ new CronJob( CRON_PATTERN, async () => {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
-        for(const entry of subjectsAndData) {
-          await postDataToLDES(entry.subject, entry.body);
+        for(const subject of Object.keys(subjectsAndData)) {
+          await postDataToLDES(subject, subjectsAndData[subject].body);
         }
 
         await updateStatusPublicService(service.publicservice.value);
