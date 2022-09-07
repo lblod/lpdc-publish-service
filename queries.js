@@ -78,11 +78,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
     }
     WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
           m8g:hasSupportingEvidence ?s.
+
         ?s a m8g:Evidence;
           dct:description ?description;
           dct:title ?name.
@@ -118,11 +118,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
+
         ?s a schema:Website;
           schema:url ?location;
           dct:title ?name.
@@ -142,15 +142,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           dct:description ?description;
           dct:title ?name.
         OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsites. }
       }`;
-  
+
   const procedureData = await query(procedureQuery);
   resultBindings.push(procedureData.results.bindings);
 
@@ -162,8 +161,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           dct:description ?description;
@@ -180,8 +178,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           cpsv:produces ?s.
 
        ?s a lpdcExt:FinancialAdvantage;
@@ -203,8 +200,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:url ?website.
        }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint.
 
@@ -227,8 +223,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?title.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           lpdcExt:attachment ?s.
          ?s a foaf:Document;
           dct:description ?description;
@@ -247,8 +242,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
       }
       WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?service)
-        ?service a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           rdfs:seeAlso ?s.
         ?s a schema:Website;
           schema:url ?location;
