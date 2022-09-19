@@ -1,5 +1,6 @@
 import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
+import bodyparser from 'body-parser';
 import fetch  from 'node-fetch';
 import { getPublicServiceDetails, getUnpublishedServices, updateStatusPublicService } from './queries';
 import { prefixes } from "./prefixes";
@@ -8,6 +9,15 @@ import {
   LDES_ENDPOINT,
   LDES_FOLDER,
 } from './env-config';
+
+app.use(bodyparser.json());
+
+/*
+*  route for getting deltas
+*/
+app.post("/delta", async function (req, res) {
+});
+
 
 /*
  * send data to ldes feed
