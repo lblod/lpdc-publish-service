@@ -9,6 +9,7 @@ import {
   LDES_ENDPOINT,
   LDES_FOLDER,
 } from './env-config';
+import { processDelta } from './deltaPostProcess';
 
 app.use(bodyparser.json());
 
@@ -16,6 +17,19 @@ app.use(bodyparser.json());
 *  route for getting deltas
 */
 app.post("/delta", async function (req, res) {
+  try{
+    const body = req.body;
+    if (LOG_INCOMING_DELTA){
+      console.log(`Receiving delta : ${JSON.stringify(body)}`);
+    }
+
+    await processDelta(body);
+
+    res.status(202).send();
+  } catch(error){
+    console.log(error);
+    res.status(500).send();
+  }
 });
 
 
