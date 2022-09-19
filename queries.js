@@ -258,6 +258,20 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 }
 
 /*
+ * takes a service object and returns if its been published
+ */
+export async function isPublishedService(service){
+  return true;
+}
+
+/*
+ * remove published status for concept
+ */
+export async function removePublishedStatus(concept){
+  return true;
+}
+
+/*
   * Takes a list of bindings and returns a list of objects ready to be sent
   * Group the results by subject.
   */
