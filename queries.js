@@ -264,7 +264,7 @@ export async function isPublishedService(service){
   const queryString = `
     ${prefixes}
     ASK  {
-    ?subject ${sparqlEscapeUri(concept.predicate.value)} ${sparqlEscapeUri(concept.object.value)};
+    ?subject ${sparqlEscapeUri(service.predicate.value)} ${sparqlEscapeUri(service.object.value)};
              adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
    }`;
   const queryData = await query( queryString );
@@ -274,13 +274,13 @@ export async function isPublishedService(service){
 /*
  * remove published status for concept
  */
-export async function removePublishedStatus(concept){
+export async function removePublishedStatus(service){
   const queryString = `${prefixes}
    DELETE {?subject adms:status ?status } WHERE{
     VALUE ?status {
       ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}
     }
-    ?subject ${sparqlEscapeUri(concept.predicate.value)} ${sparqlEscapeUri(concept.object.value)};
+    ?subject ${sparqlEscapeUri(service.predicate.value)} ${sparqlEscapeUri(service.object.value)};
              adms:status ?status.
   }`;
   const queryData = await query(queryString);
