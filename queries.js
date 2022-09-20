@@ -261,14 +261,29 @@ export async function getPublicServiceDetails( publicServiceUri ) {
  * takes a service object and returns if its been published
  */
 export async function isPublishedService(service){
-  return true;
+  const queryString = `
+    ${prefixes}
+    ASK  {
+    ?subject ${sparqlEscapeUri(concept.predicate.value)} ${sparqlEscapeUri(concept.object.value)};
+             adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+   }`;
+  const queryData = await query( queryString );
+  return queryData.bindings.status.value;
 }
 
 /*
  * remove published status for concept
  */
 export async function removePublishedStatus(concept){
-  return true;
+  const queryString = `${prefixes}
+   DELETE {?subject adms:status ?status } WHERE{
+    VALUE ?status {
+      ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}
+    }
+    ?subject ${sparqlEscapeUri(concept.predicate.value)} ${sparqlEscapeUri(concept.object.value)};
+             adms:status ?status.
+  }`;
+  const queryData = await query(queryString);
 }
 
 /*
