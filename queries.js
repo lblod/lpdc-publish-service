@@ -268,7 +268,7 @@ export async function isPublishedService(service){
         adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
    }`;
   const queryData = await query( queryString );
-  return queryData.bindings.status.value;
+  return queryData.boolean;
 }
 
 /*
