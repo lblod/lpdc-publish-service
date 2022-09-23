@@ -8,6 +8,7 @@ import {
   CRON_PATTERN,
   LDES_ENDPOINT,
   LDES_FOLDER,
+  LOG_INCOMING_DELTA,
 } from './env-config';
 import { processDelta } from './deltaPostProcess';
 
