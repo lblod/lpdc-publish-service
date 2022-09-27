@@ -258,7 +258,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 }
 
 /*
- * takes a service object and returns if its been published
+ * takes a service object and returns if it has been published
  */
 export async function isPublishedService(service){
   const queryString = `
