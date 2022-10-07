@@ -3,7 +3,8 @@ import { isPublishedService, removePublishedStatus } from './queries';
 export async function processDelta(deltabody){
   const rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
   const cpsvPublicService = "http://purl.org/vocab/cpsv#PublicService";
-  //get insertions
+
+  //get insertions with type PublicService
   const insertions = deltabody.flatMap( x => x.inserts )
       .filter(x=> x.predicate.value == rdfType && x.object.value == cpsvPublicService);
   for (let concept of insertions) {

@@ -271,7 +271,7 @@ export async function isPublishedService(service){
 }
 
 /*
- * remove published status for concept
+ * removes published status for a give service
  */
 export async function removePublishedStatus(service){
   const queryString = `${prefixes}
