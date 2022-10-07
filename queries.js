@@ -275,12 +275,8 @@ export async function isPublishedService(service){
  */
 export async function removePublishedStatus(service){
   const queryString = `${prefixes}
-   DELETE {?subject adms:status ?status } WHERE{
-    VALUE ?status {
-      ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}
-    }
-    ?subject ${sparqlEscapeUri(service.predicate.value)} ${sparqlEscapeUri(service.object.value)};
-             adms:status ?status.
+   DELETE DATA {
+    ${sparqlEscapeUri(service.subject.value)} adms:status ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
   }`;
   const queryData = await query(queryString);
 }
