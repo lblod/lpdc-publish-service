@@ -277,10 +277,20 @@ export async function isPublishedService(service){
  * removes published status for a give service
  */
 export async function removePublishedStatus(service){
-  const queryString = `${prefixes}
-   DELETE DATA {
-    ${sparqlEscapeUri(service.subject.value)} schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
-  }`;
+  const queryString = `
+    ${prefixes}
+    DELETE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(service.subject.value)}
+          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      }
+    }
+    WHERE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(service.subject.value)}
+          a cpsv:PublicService .
+      }
+    }`;
   const queryData = await query(queryString);
 }
 
