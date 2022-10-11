@@ -263,11 +263,12 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 export async function isPublishedService(service){
   const queryString = `
     ${prefixes}
-    ASK  {
-    ${sparqlEscapeUri(service.subject.value)} a cpsv:PublicService;
-      adms:status ${sparqlEscapeUri(SENT_URI)};
-      schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
-   }`;
+    ASK {
+      ${sparqlEscapeUri(service.subject.value)}
+        a cpsv:PublicService ;
+        adms:status ${sparqlEscapeUri(SENT_URI)} ;
+        schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+    }`;
   const queryData = await query( queryString );
   return queryData.boolean;
 }
