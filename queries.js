@@ -198,6 +198,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
           schema:url ?website.
+        ?address adres:postcode ?postcode;
+          adres:Straatnaam ?streetname;
+          adres:land ?country;
+          adres:gemeentenaam ?municipality;
+          adres:volledigAdres ?fullAdress;
+          adres:Adresvoorstelling.huisnummer ?houseNumber;
+          adres:Adresvoorstelling.busnummer ?mailbox;
+          locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
