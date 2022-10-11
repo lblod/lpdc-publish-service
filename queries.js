@@ -209,6 +209,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
         OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
+        OPTIONAL { ?address adres:postcode ?postcode. }
+        OPTIONAL { ?address adres:Straatnaam ?streetname. }
+        OPTIONAL { ?address adres:land ?country. }
+        OPTIONAL { ?address adres:gemeentenaam ?municipality. }
+        OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
+        OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
+        OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
+        OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
 
       }`;
   const contactPointData = await query(contactPointQuery);
