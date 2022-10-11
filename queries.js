@@ -264,7 +264,8 @@ export async function isPublishedService(service){
   const queryString = `
     ${prefixes}
     ASK  {
-    ${sparqlEscapeUri(service.subject.value)} adms:status ${sparqlEscapeUri(SENT_URI)};
+    ${sparqlEscapeUri(service.subject.value)} a cpsv:PublicService;
+      adms:status ${sparqlEscapeUri(SENT_URI)};
       schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
    }`;
   const queryData = await query( queryString );
