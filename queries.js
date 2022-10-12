@@ -261,12 +261,13 @@ export async function getPublicServiceDetails( publicServiceUri ) {
  * takes a service object and returns if it has been published
  */
 export async function isPublishedService(service){
+  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
   const queryString = `
     ${prefixes}
     ASK {
       ${sparqlEscapeUri(service.subject.value)}
         a cpsv:PublicService ;
-        adms:status ${sparqlEscapeUri(SENT_URI)} ;
+        adms:status ${sparqlEscapeUri(concept_uri)};
         schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
     }`;
   const queryData = await query( queryString );
