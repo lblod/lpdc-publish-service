@@ -20,4 +20,5 @@ export const prefixes = `
   PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
   PREFIX ps: <http://vocab.belgif.be/ns/publicservice#>
   PREFIX lpdcExt: <https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#>
-  PREFIX locn: <http://www.w3.org/ns/locn>`;
+  PREFIX locn: <http://www.w3.org/ns/locn>
+  PREFIX adres: <https://data.vlaanderen.be/ns/adres#>`;

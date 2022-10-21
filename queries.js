@@ -198,6 +198,15 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
           schema:url ?website.
+        ?address a <http://www.w3.org/ns/locn#Address>; 
+          adres:postcode ?postcode;
+          adres:Straatnaam ?streetname;
+          adres:land ?country;
+          adres:gemeentenaam ?municipality;
+          adres:volledigAdres ?fullAdress;
+          adres:Adresvoorstelling.huisnummer ?houseNumber;
+          adres:Adresvoorstelling.busnummer ?mailbox;
+          locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
@@ -209,6 +218,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
         OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
+        OPTIONAL { ?address adres:postcode ?postcode. }
+        OPTIONAL { ?address adres:Straatnaam ?streetname. }
+        OPTIONAL { ?address adres:land ?country. }
+        OPTIONAL { ?address adres:gemeentenaam ?municipality. }
+        OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
+        OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
+        OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
+        OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
 
       }`;
   const contactPointData = await query(contactPointQuery);
