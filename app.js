@@ -2,6 +2,7 @@ import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import fetch  from 'node-fetch';
 import { getPublicServiceDetails, getUnpublishedServices, updateStatusPublicService } from './queries';
+import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
 
 import {
   CRON_PATTERN,
@@ -19,7 +20,7 @@ async function postDataToLDES(uri, body) {
       resource: uri
     });
 
-    const headers = extractHeadersFromEnv(LDES_ENDPOINT_HEADER_PREFIX) 
+    const headers = extractHeadersFromEnv(LDES_ENDPOINT_HEADER_PREFIX);
     headers["Content-Type"] = "text/turtle";
 
     const response = await fetch(`${LDES_ENDPOINT}/${LDES_FOLDER}?` + queryParams, {
