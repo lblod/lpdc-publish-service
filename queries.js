@@ -198,6 +198,15 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
           schema:url ?website.
+        ?address a <http://www.w3.org/ns/locn#Address>; 
+          adres:postcode ?postcode;
+          adres:Straatnaam ?streetname;
+          adres:land ?country;
+          adres:gemeentenaam ?municipality;
+          adres:volledigAdres ?fullAdress;
+          adres:Adresvoorstelling.huisnummer ?houseNumber;
+          adres:Adresvoorstelling.busnummer ?mailbox;
+          locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
@@ -209,6 +218,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
         OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
+        OPTIONAL { ?address adres:postcode ?postcode. }
+        OPTIONAL { ?address adres:Straatnaam ?streetname. }
+        OPTIONAL { ?address adres:land ?country. }
+        OPTIONAL { ?address adres:gemeentenaam ?municipality. }
+        OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
+        OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
+        OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
+        OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
 
       }`;
   const contactPointData = await query(contactPointQuery);
@@ -255,6 +272,44 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const results = createResultObject(resultBindings);
 
   return results;
+}
+
+/*
+ * takes a service object and returns if it has been published
+ */
+export async function isPublishedService(service){
+  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
+  const queryString = `
+    ${prefixes}
+    ASK {
+      ${sparqlEscapeUri(service.subject.value)}
+        a cpsv:PublicService ;
+        adms:status ${sparqlEscapeUri(concept_uri)};
+        schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+    }`;
+  const queryData = await query( queryString );
+  return queryData.boolean;
+}
+
+/*
+ * removes published status for a give service
+ */
+export async function removePublishedStatus(service){
+  const queryString = `
+    ${prefixes}
+    DELETE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(service.subject.value)}
+          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      }
+    }
+    WHERE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(service.subject.value)}
+          a cpsv:PublicService .
+      }
+    }`;
+  const queryData = await query(queryString);
 }
 
 /*

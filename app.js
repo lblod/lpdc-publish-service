@@ -1,5 +1,6 @@
 import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
+import bodyparser from 'body-parser';
 import fetch  from 'node-fetch';
 import { getPublicServiceDetails, getUnpublishedServices, updateStatusPublicService } from './queries';
 import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
@@ -9,7 +10,31 @@ import {
   LDES_ENDPOINT,
   LDES_FOLDER,
   LDES_ENDPOINT_HEADER_PREFIX,
+  LOG_INCOMING_DELTA
 } from './env-config';
+import { processDelta } from './deltaPostProcess';
+
+app.use(bodyparser.json());
+
+/*
+*  route for getting deltas
+*/
+app.post("/delta", async function (req, res) {
+  try{
+    const body = req.body;
+    if (LOG_INCOMING_DELTA){
+      console.log(`Receiving delta : ${JSON.stringify(body)}`);
+    }
+
+    await processDelta(body);
+
+    res.status(202).send();
+  } catch(error){
+    console.log(error);
+    res.status(500).send();
+  }
+});
+
 
 /*
  * send data to ldes feed
