@@ -229,7 +229,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 
       }`;
   const contactPointData = await query(contactPointQuery);
-  debugger;
   resultBindings.push(contactPointData.results.bindings);
 
   const documentQuery = `
