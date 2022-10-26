@@ -313,18 +313,18 @@ export async function removePublishedStatus(service){
 }
 
 /*
-  * Takes a list of bindings and returns a list of objects ready to be sent
-  * Group the results by subject.
-  */
-function createResultObject(bindingsList){
+ * Takes a list of bindings and returns a list of objects ready to be sent
+ * Group the results by subject.
+ * The triples to be published are bundled per suject, so everything gets properly versioned
+ */
+function createResultObject(bindingsList) {
   const  resultObject = {};
-  for(let bindings of bindingsList){
-    // ignore empty bindingSet
-    if (bindings.length){
-      const triples = bindingsToNT(bindings).join('\r\n')+"\r\n";
-      const subject = bindings[0].s.value;
+  for(let bindings of bindingsList) {
+    const uniqueSubjects = [ ...new Set(bindings.map(b => b.s.value)) ];
+    for(const subject of uniqueSubjects) {
+      const bindingsForSubject = bindings.filter(b => b.s.value == subject);
       resultObject[subject] = {
-        body: triples
+        body: bindingsToNT(bindingsForSubject).join('\r\n')+"\r\n"
       };
     }
   }
