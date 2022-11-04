@@ -12,7 +12,8 @@
     "@lblod/mu-auth-sudo": "^0.6.0",
     "cron": "^1.8.2",
     "body-parser": "^1.20.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "jsonld": "8.1.0"
   },
   "devDependencies": {
   }

@@ -1,1 +1,2 @@
-FROM semtech/mu-javascript-template:1.6.0
+FROM semtech/mu-javascript-template:feature-node-16-support
+LABEL maintainer="madnificent@gmail.com"
