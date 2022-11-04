@@ -1,4 +1,5 @@
 import * as jsonld from 'jsonld';
+import N3 from 'n3';
 import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
 export async function putDataToIpdc(subjectsAndData) {
   let ttl = ''
@@ -6,17 +7,12 @@ export async function putDataToIpdc(subjectsAndData) {
     const body = subjectsAndData[subject].body
     ttl += body;
   }
-  //bug/feature in jsonld rdf parser?
-  //my best attempt at changing triple quotes to single quotes and escaping " and \n
-  ttl = ttl.replace(/([^"]""")([\s\S]*?)("""[^"])/g, function (match, group1, group2, group3) {
-    group2 = group2.replaceAll(`\n`, `\\n`);
-    group2 = group2.replaceAll(`"`, `\\"`);
-    group1 = group1.replace(`"""`, `"`);
-    group3 = group3.replace(`"""`, `"`);
-    const result = `${group1}${group2}${group3}`
-    return result;
-  });
-  const fromRdf = await jsonld.fromRDF(ttl);
+
+  const parser = new N3.Parser({ format: 'text/turtle' });
+
+  const quads = parser.parse(ttl);
+
+  const fromRdf = await jsonld.fromRDF(quads);
   const doc = await jsonld.expand(fromRdf);
 
   const headers = {

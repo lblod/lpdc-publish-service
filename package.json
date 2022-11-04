@@ -13,7 +13,8 @@
     "cron": "^1.8.2",
     "body-parser": "^1.20.0",
     "node-fetch": "^2.6.7",
-    "jsonld": "8.1.0"
+    "jsonld": "8.1.0",
+    "n3": "1.16.2"
   },
   "devDependencies": {
   }
