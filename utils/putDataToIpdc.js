@@ -27,6 +27,7 @@ export async function putDataToIpdc(subjectsAndData) {
   });
 
   if (!response.ok) {
-    throw new Error(response);
+    console.log(response);
+    throw new Error("something went wrong when submitting to ipdc");
   }
 }
