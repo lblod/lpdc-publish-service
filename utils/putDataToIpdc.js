@@ -19,15 +19,17 @@ export async function putDataToIpdc(subjectsAndData) {
     'x-api-key': IPDC_X_API_KEY,
     'Content-Type': 'application/ld+json'
   }
-
+  debugger;
   const response = await fetch(IPDC_JSON_ENDPOINT, {
     method: "PUT",
     headers,
-    body: doc,
+    body: JSON.stringify(doc),
   });
 
   if (!response.ok) {
-    console.log(response);
-    throw new Error("something went wrong when submitting to ipdc");
+    throw new Error("something went wrong when submitting to ipdc: \n"+JSON.stringify(response));
+  }
+  else{
+    console.log("succesfully sent data to ipdc: \n"+JSON.stringify(doc))
   }
 }
