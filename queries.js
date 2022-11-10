@@ -112,7 +112,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteOnlineProcedureQuery = `
   ${prefixes}
   CONSTRUCT {
-        ?s a schema:Website;
+        ?s a schema:WebSite;
           dct:description ?description;
           schema:url ?location;
           dct:title ?name.
@@ -123,7 +123,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
 
-        ?s a schema:Website;
+        ?s a schema:WebSite;
           schema:url ?location;
           dct:title ?name.
 
@@ -253,7 +253,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteQuery = `
   ${prefixes}
       CONSTRUCT {
-        ?s a schema:Website;
+        ?s a schema:WebSite;
           dct:description ?description;
           schema:url ?location;
           dct:title ?name.
@@ -261,7 +261,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           rdfs:seeAlso ?s.
-        ?s a schema:Website;
+        ?s a schema:WebSite;
           schema:url ?location;
           dct:title ?name.
         OPTIONAL { ?s dct:description ?description. }

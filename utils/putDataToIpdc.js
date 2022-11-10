@@ -19,7 +19,7 @@ export async function putDataToIpdc(subjectsAndData) {
     'x-api-key': IPDC_X_API_KEY,
     'Content-Type': 'application/ld+json'
   }
-  debugger;
+
   const response = await fetch(IPDC_JSON_ENDPOINT, {
     method: "PUT",
     headers,
