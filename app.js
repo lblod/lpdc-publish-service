@@ -4,7 +4,7 @@ import bodyparser from 'body-parser';
 import fetch  from 'node-fetch';
 import { getPublicServiceDetails, getUnpublishedServices, updateStatusPublicService } from './queries';
 import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
-
+import { putDataToIpdc } from './utils/putDataToIpdc'
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
@@ -77,7 +77,7 @@ new CronJob( CRON_PATTERN, async () => {
         for(const subject of Object.keys(subjectsAndData)) {
           await postDataToLDES(subject, subjectsAndData[subject].body);
         }
-
+        await putDataToIpdc(subjectsAndData);
         await updateStatusPublicService(service.publicservice.value);
 
         console.log(`Successfully published ${service.publicservice.value}`);
@@ -91,6 +91,5 @@ new CronJob( CRON_PATTERN, async () => {
     console.log(e);
   }
 }, null, true);
-
 
 app.use(errorHandler);
