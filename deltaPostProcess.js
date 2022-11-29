@@ -1,4 +1,4 @@
-import { isPublishedService, removePublishedStatus } from './queries';
+import { isPublishedService, updateStatusPublicService, STATUS_REPUBLISHED_URI } from './queries';
 
 export async function processDelta(deltabody){
   const admsStatus = "http://www.w3.org/ns/adms#status";
@@ -11,7 +11,7 @@ export async function processDelta(deltabody){
     // check if status concept has been published
     const isPublished = await isPublishedService( concept );
     if (isPublished){
-      removePublishedStatus( concept );
+      updateStatusPublicService(concept, STATUS_REPUBLISHED_URI);
     }
   }
 }

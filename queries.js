@@ -5,7 +5,8 @@ import { bindingsToNT } from "./utils/bindingsToNT";
 
 //TODO:
 // - add label STATUS_PUBLISHED_URI, with migration
-const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/a7d01120-6f93-11ed-bcb8-a144c50c46d7";
 const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
 
 /*
@@ -30,19 +31,24 @@ export async function getUnpublishedServices() {
 /*
  * update the status of posted data.
  */
-export async function updateStatusPublicService(uri) {
+export async function updateStatusPublicService(uri, status) {
   const statusUpdate = `
   ${prefixes}
 
+  DELETE {
+    GRAPH ?g {
+     ?subject schema:publication ?publicationStatus.
+    }
+  }
   INSERT {
     GRAPH ?g {
-      ?service schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+      ?service schema:publication ${sparqlEscapeUri(status)}.
     }
   }
   WHERE {
     BIND(${sparqlEscapeUri(uri)} as ?service)
     GRAPH ?g {
-     ?service a cpsv:PublicService.
+     ?subject schema:publication ?publicationStatus.
     }
   }
   `;
