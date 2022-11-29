@@ -298,27 +298,6 @@ export async function isPublishedService(service){
 }
 
 /*
- * removes published status for a give service
- */
-export async function removePublishedStatus(service){
-  const queryString = `
-    ${prefixes}
-    DELETE {
-      GRAPH ?g {
-        ${sparqlEscapeUri(service.subject.value)}
-          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
-      }
-    }
-    WHERE {
-      GRAPH ?g {
-        ${sparqlEscapeUri(service.subject.value)}
-          a cpsv:PublicService .
-      }
-    }`;
-  const queryData = await query(queryString);
-}
-
-/*
  * Takes a list of bindings and returns a list of objects ready to be sent
  * Group the results by subject.
  * The triples to be published are bundled per suject, so everything gets properly versioned
