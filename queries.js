@@ -288,10 +288,17 @@ export async function isPublishedService(service){
   const queryString = `
     ${prefixes}
     ASK {
-      ${sparqlEscapeUri(service.subject.value)}
-        a cpsv:PublicService ;
-        adms:status ${sparqlEscapeUri(concept_uri)};
-        schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      {
+        ${sparqlEscapeUri(service.subject.value)}
+          a cpsv:PublicService ;
+          adms:status ${sparqlEscapeUri(concept_uri)};
+          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      }
+      UNION {
+        ${sparqlEscapeUri(service.subject.value)} a as:Tombstone;
+            as:formerType cpsv:PublicService;
+            schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)} .
+        }
     }`;
   const queryData = await query( queryString );
   return queryData.boolean;
