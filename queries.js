@@ -14,16 +14,33 @@ const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e950
  */
 export async function getUnpublishedServices() {
    const queryString = `
-   ${prefixes}
-   SELECT DISTINCT ?publicservice WHERE {
-     GRAPH ?graph {
-       ?publicservice a cpsv:PublicService;
-         adms:status ${sparqlEscapeUri(SENT_URI)}.
+    ${prefixes}
+    SELECT DISTINCT ?publicservice WHERE {
+     {
+       GRAPH ?graph {
+         ?publicservice a cpsv:PublicService;
+           adms:status ${sparqlEscapeUri(SENT_URI)}.
+       }
+       FILTER NOT EXISTS{
+        ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+       }
      }
-     FILTER NOT EXISTS{
-      ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+     UNION {
+        GRAPH ?graph {
+         ?publicservice a cpsv:PublicService;
+           adms:status ${sparqlEscapeUri(SENT_URI)};
+           schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+       }
      }
-   }`;
+     UNION {
+       GRAPH ?graph {
+         ?publicservice a as:Tombstone;
+         as:formerType cpsv:PublicService;
+         schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+       }
+     }
+   }
+  `
   const result = (await query(queryString)).results.bindings;
   return result;
 };
