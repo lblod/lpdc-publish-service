@@ -292,6 +292,23 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
+  const tombStoneQuery = `
+    ${prefixes}
+    SELECT DISTINCT ?s ?p ?o {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+      VALUES ?p {
+        as:deleted
+      }
+      GRAPH ?g {
+        ?s a as:Tombstone;
+          as:formerType cpsv:PublicService;
+          ?p ?o.
+      }
+    }
+  `;
+  let tombStoneData = await query(tombStoneQuery);
+  resultBindings.push(tombStoneData.results.bindings);
+
   const results = createResultObject(resultBindings);
 
   return results;
