@@ -9,7 +9,7 @@ export async function processDelta(concepts){
     // check if status concept has been published
     const isPublished = await isPublishedService( publicService );
     if (isPublished){
-      updateStatusPublicService(publicService, STATUS_TO_REPUBLISH_URI);
+      await updateStatusPublicService(publicService, STATUS_TO_REPUBLISH_URI);
     }
   }
 }
