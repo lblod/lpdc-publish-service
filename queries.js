@@ -63,7 +63,7 @@ export async function updateStatusPublicService(uri, status) {
     }
   }
   WHERE {
-    BIND(${sparqlEscapeUri(uri)} as ?service)
+    BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
      ?subject schema:publication ?publicationStatus.
     }
