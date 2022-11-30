@@ -69,9 +69,7 @@ export async function updateStatusPublicService(uri, status) {
     }
   }
   `;
-  const resp = await update(statusUpdate);
-  return resp.results.bindings;
-
+  await update(statusUpdate);
 };
 
 
