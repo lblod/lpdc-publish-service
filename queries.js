@@ -12,7 +12,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e950
 /*
  * Poll data from any graphs
  */
-export async function getUnpublishedServices() {
+export async function getServicesToPublish() {
    const queryString = `
     ${prefixes}
     SELECT DISTINCT ?publicservice WHERE {
