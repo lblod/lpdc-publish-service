@@ -12,7 +12,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e950
 /*
  * Poll data from any graphs
  */
-export async function getUnpublishedServices() {
+export async function getServicesToPublish() {
    const queryString = `
     ${prefixes}
     SELECT DISTINCT ?publicservice WHERE {
@@ -40,7 +40,7 @@ export async function getUnpublishedServices() {
        }
      }
    }
-  `
+  `;
   const result = (await query(queryString)).results.bindings;
   return result;
 };
@@ -59,19 +59,18 @@ export async function updateStatusPublicService(uri, status) {
   }
   INSERT {
     GRAPH ?g {
-      ?service schema:publication ${sparqlEscapeUri(status)}.
+      ?subject schema:publication ${sparqlEscapeUri(status)}.
     }
   }
   WHERE {
-    BIND(${sparqlEscapeUri(uri)} as ?service)
+    BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?subject schema:publication ?publicationStatus.
+     ?subject a ?foo.
+     OPTIONAL { ?subject schema:publication ?publicationStatus. }.
     }
   }
   `;
-  const resp = await update(statusUpdate);
-  return resp.results.bindings;
-
+  await update(statusUpdate);
 };
 
 
@@ -294,8 +293,17 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 
   const tombStoneQuery = `
     ${prefixes}
-    SELECT DISTINCT ?s ?p ?o {
+    CONSTRUCT {
+      ?s ?p ?o.
+    }
+    WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+
+      VALUES ?p {
+       <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+       <https://www.w3.org/ns/activitystreams#formerType>
+       <https://www.w3.org/ns/activitystreams#deleted>
+      }
       GRAPH ?g {
         ?s a as:Tombstone;
           as:formerType cpsv:PublicService;
@@ -315,18 +323,20 @@ export async function getPublicServiceDetails( publicServiceUri ) {
  * takes a service object and returns if it has been published
  */
 export async function isPublishedService(service){
-  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
+  // Note: the extra check on tombstone,
+  //   is because service can be deleted before delta gets processed
+  const conceptUri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
   const queryString = `
     ${prefixes}
     ASK {
       {
-        ${sparqlEscapeUri(service.subject.value)}
+        ${sparqlEscapeUri(service)}
           a cpsv:PublicService ;
-          adms:status ${sparqlEscapeUri(concept_uri)};
+          adms:status ${sparqlEscapeUri(conceptUri)};
           schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
       }
       UNION {
-        ${sparqlEscapeUri(service.subject.value)} a as:Tombstone;
+        ${sparqlEscapeUri(service)} a as:Tombstone;
             as:formerType cpsv:PublicService;
             schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
         }

@@ -1,10 +1,11 @@
 import * as jsonld from 'jsonld';
 import N3 from 'n3';
 import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
+
 export async function putDataToIpdc(subjectsAndData) {
-  let ttl = ''
+  let ttl = '';
   for (const subject of Object.keys(subjectsAndData)) {
-    const body = subjectsAndData[subject].body
+    const body = subjectsAndData[subject].body;
     ttl += body;
   }
 
@@ -18,7 +19,7 @@ export async function putDataToIpdc(subjectsAndData) {
   const headers = {
     'x-api-key': IPDC_X_API_KEY,
     'Content-Type': 'application/ld+json'
-  }
+  };
 
   const response = await fetch(IPDC_JSON_ENDPOINT, {
     method: "PUT",
