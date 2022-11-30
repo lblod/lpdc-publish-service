@@ -297,6 +297,12 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     }
     WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+
+      VALUES ?p {
+       <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+       <https://www.w3.org/ns/activitystreams#formerType>
+       <https://www.w3.org/ns/activitystreams#deleted>
+      }
       GRAPH ?g {
         ?s a as:Tombstone;
           as:formerType cpsv:PublicService;
