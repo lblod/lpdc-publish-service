@@ -296,9 +296,6 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     ${prefixes}
     SELECT DISTINCT ?s ?p ?o {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
-      VALUES ?p {
-        as:deleted
-      }
       GRAPH ?g {
         ?s a as:Tombstone;
           as:formerType cpsv:PublicService;
