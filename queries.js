@@ -331,7 +331,7 @@ export async function isPublishedService(service){
       UNION {
         ${sparqlEscapeUri(service.subject.value)} a as:Tombstone;
             as:formerType cpsv:PublicService;
-            schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)} .
+            schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
         }
     }`;
   const queryData = await query( queryString );
