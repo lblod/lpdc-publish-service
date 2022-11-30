@@ -316,9 +316,9 @@ export async function getPublicServiceDetails( publicServiceUri ) {
  * takes a service object and returns if it has been published
  */
 export async function isPublishedService(service){
-  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
   // Note: the extra check on tombstone,
   //   is because service can be deleted before delta gets processed
+  const conceptUri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
   const queryString = `
     ${prefixes}
     ASK {
