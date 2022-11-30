@@ -5,24 +5,42 @@ import { bindingsToNT } from "./utils/bindingsToNT";
 
 //TODO:
 // - add label STATUS_PUBLISHED_URI, with migration
-const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
+export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/a7d01120-6f93-11ed-bcb8-a144c50c46d7";
 const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
 
 /*
  * Poll data from any graphs
  */
-export async function getUnpublishedServices() {
+export async function getServicesToPublish() {
    const queryString = `
-   ${prefixes}
-   SELECT DISTINCT ?publicservice WHERE {
-     GRAPH ?graph {
-       ?publicservice a cpsv:PublicService;
-         adms:status ${sparqlEscapeUri(SENT_URI)}.
+    ${prefixes}
+    SELECT DISTINCT ?publicservice WHERE {
+     {
+       GRAPH ?graph {
+         ?publicservice a cpsv:PublicService;
+           adms:status ${sparqlEscapeUri(SENT_URI)}.
+       }
+       FILTER NOT EXISTS{
+        ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+       }
      }
-     FILTER NOT EXISTS{
-      ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+     UNION {
+        GRAPH ?graph {
+         ?publicservice a cpsv:PublicService;
+           adms:status ${sparqlEscapeUri(SENT_URI)};
+           schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+       }
      }
-   }`;
+     UNION {
+       GRAPH ?graph {
+         ?publicservice a as:Tombstone;
+         as:formerType cpsv:PublicService;
+         schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+       }
+     }
+   }
+  `;
   const result = (await query(queryString)).results.bindings;
   return result;
 };
@@ -30,25 +48,29 @@ export async function getUnpublishedServices() {
 /*
  * update the status of posted data.
  */
-export async function updateStatusPublicService(uri) {
+export async function updateStatusPublicService(uri, status) {
   const statusUpdate = `
   ${prefixes}
 
+  DELETE {
+    GRAPH ?g {
+     ?subject schema:publication ?publicationStatus.
+    }
+  }
   INSERT {
     GRAPH ?g {
-      ?service schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+      ?subject schema:publication ${sparqlEscapeUri(status)}.
     }
   }
   WHERE {
-    BIND(${sparqlEscapeUri(uri)} as ?service)
+    BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?service a cpsv:PublicService.
+     ?subject a ?foo.
+     OPTIONAL { ?subject schema:publication ?publicationStatus. }.
     }
   }
   `;
-  const resp = await update(statusUpdate);
-  return resp.results.bindings;
-
+  await update(statusUpdate);
 };
 
 
@@ -269,6 +291,29 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   const websiteData = await query(websiteQuery);
   resultBindings.push(websiteData.results.bindings);
 
+  const tombStoneQuery = `
+    ${prefixes}
+    CONSTRUCT {
+      ?s ?p ?o.
+    }
+    WHERE {
+      BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+
+      VALUES ?p {
+       <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+       <https://www.w3.org/ns/activitystreams#formerType>
+       <https://www.w3.org/ns/activitystreams#deleted>
+      }
+      GRAPH ?g {
+        ?s a as:Tombstone;
+          as:formerType cpsv:PublicService;
+          ?p ?o.
+      }
+    }
+  `;
+  let tombStoneData = await query(tombStoneQuery);
+  resultBindings.push(tombStoneData.results.bindings);
+
   const results = createResultObject(resultBindings);
 
   return results;
@@ -278,38 +323,26 @@ export async function getPublicServiceDetails( publicServiceUri ) {
  * takes a service object and returns if it has been published
  */
 export async function isPublishedService(service){
-  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
+  // Note: the extra check on tombstone,
+  //   is because service can be deleted before delta gets processed
+  const conceptUri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
   const queryString = `
     ${prefixes}
     ASK {
-      ${sparqlEscapeUri(service.subject.value)}
-        a cpsv:PublicService ;
-        adms:status ${sparqlEscapeUri(concept_uri)};
-        schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      {
+        ${sparqlEscapeUri(service)}
+          a cpsv:PublicService ;
+          adms:status ${sparqlEscapeUri(conceptUri)};
+          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+      }
+      UNION {
+        ${sparqlEscapeUri(service)} a as:Tombstone;
+            as:formerType cpsv:PublicService;
+            schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
+        }
     }`;
   const queryData = await query( queryString );
   return queryData.boolean;
-}
-
-/*
- * removes published status for a give service
- */
-export async function removePublishedStatus(service){
-  const queryString = `
-    ${prefixes}
-    DELETE {
-      GRAPH ?g {
-        ${sparqlEscapeUri(service.subject.value)}
-          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
-      }
-    }
-    WHERE {
-      GRAPH ?g {
-        ${sparqlEscapeUri(service.subject.value)}
-          a cpsv:PublicService .
-      }
-    }`;
-  const queryData = await query(queryString);
 }
 
 /*

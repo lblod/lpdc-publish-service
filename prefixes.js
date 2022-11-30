@@ -21,4 +21,6 @@ export const prefixes = `
   PREFIX ps: <http://vocab.belgif.be/ns/publicservice#>
   PREFIX lpdcExt: <https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#>
   PREFIX locn: <http://www.w3.org/ns/locn>
-  PREFIX adres: <https://data.vlaanderen.be/ns/adres#>`;
+  PREFIX adres: <https://data.vlaanderen.be/ns/adres#>
+  PREFIX as:  <https://www.w3.org/ns/activitystreams#>
+`;

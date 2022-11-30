@@ -2,9 +2,9 @@ import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import bodyparser from 'body-parser';
 import fetch  from 'node-fetch';
-import { getPublicServiceDetails, getUnpublishedServices, updateStatusPublicService } from './queries';
+import { getPublicServiceDetails, getServicesToPublish, updateStatusPublicService, STATUS_PUBLISHED_URI } from './queries';
 import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
-import { putDataToIpdc } from './utils/putDataToIpdc'
+import { putDataToIpdc } from './utils/putDataToIpdc';
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
@@ -66,7 +66,7 @@ async function postDataToLDES(uri, body) {
 
 new CronJob( CRON_PATTERN, async () => {
   try{
-    const unpublishedServices = await getUnpublishedServices();
+    const unpublishedServices = await getServicesToPublish();
 
     console.log(`Found ${unpublishedServices.length} to publish`);
 
@@ -78,7 +78,7 @@ new CronJob( CRON_PATTERN, async () => {
           await postDataToLDES(subject, subjectsAndData[subject].body);
         }
         await putDataToIpdc(subjectsAndData);
-        await updateStatusPublicService(service.publicservice.value);
+        await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
 
         console.log(`Successfully published ${service.publicservice.value}`);
       }

@@ -1,17 +1,15 @@
-import { isPublishedService, removePublishedStatus } from './queries';
+import { isPublishedService, updateStatusPublicService, STATUS_TO_REPUBLISH_URI } from './queries';
 
-export async function processDelta(deltabody){
-  const admsStatus = "http://www.w3.org/ns/adms#status";
-  const concept_uri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
-
-  //get insertions with type PublicService
-  const insertions = deltabody.flatMap( x => x.inserts )
-      .filter(x=> x.predicate.value == admsStatus && x.object.value == concept_uri);
-  for (let concept of insertions) {
+export async function processDelta(concepts){
+  // Extracts the subjects of interest. We only expect inserts to be interesting (status or tombstone gets inserted).
+  // Deltanotfier rules will make sure we're close to getting what we want.
+  let deltasBindings = concepts.flatMap( x => x.inserts ).map(x => x.subject.value);
+  deltasBindings = [ ...new Set(deltasBindings) ]; //make them unique
+  for (let publicService of deltasBindings) {
     // check if status concept has been published
-    const isPublished = await isPublishedService( concept );
+    const isPublished = await isPublishedService( publicService );
     if (isPublished){
-      removePublishedStatus( concept );
+      await updateStatusPublicService(publicService, STATUS_TO_REPUBLISH_URI);
     }
   }
 }
