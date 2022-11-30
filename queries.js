@@ -294,7 +294,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 
   const tombStoneQuery = `
     ${prefixes}
-    SELECT DISTINCT ?s ?p ?o {
+    SELECT DISTINCT ?s ?p ?o WHERE {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
       GRAPH ?g {
         ?s a as:Tombstone;
