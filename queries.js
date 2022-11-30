@@ -40,7 +40,7 @@ export async function getServicesToPublish() {
        }
      }
    }
-  `
+  `;
   const result = (await query(queryString)).results.bindings;
   return result;
 };
@@ -323,13 +323,13 @@ export async function isPublishedService(service){
     ${prefixes}
     ASK {
       {
-        ${sparqlEscapeUri(service.subject.value)}
+        ${sparqlEscapeUri(service)}
           a cpsv:PublicService ;
-          adms:status ${sparqlEscapeUri(concept_uri)};
+          adms:status ${sparqlEscapeUri(conceptUri)};
           schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
       }
       UNION {
-        ${sparqlEscapeUri(service.subject.value)} a as:Tombstone;
+        ${sparqlEscapeUri(service)} a as:Tombstone;
             as:formerType cpsv:PublicService;
             schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
         }
