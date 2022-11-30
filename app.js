@@ -14,6 +14,8 @@ import {
 } from './env-config';
 import { processDelta } from './deltaPostProcess';
 
+const POST_TO_LDES_ENABLED = process.env.POST_TO_LDES_ENABLED == 'true' || false;
+
 app.use(bodyparser.json());
 
 /*
@@ -74,8 +76,13 @@ new CronJob( CRON_PATTERN, async () => {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
-        for(const subject of Object.keys(subjectsAndData)) {
-          await postDataToLDES(subject, subjectsAndData[subject].body);
+        if(POST_TO_LDES_ENABLED) {
+          for(const subject of Object.keys(subjectsAndData)) {
+            await postDataToLDES(subject, subjectsAndData[subject].body);
+          }
+        }
+        else {
+          console.log(`POST TO LDES disabled, skipping`);
         }
         await putDataToIpdc(subjectsAndData);
         await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
