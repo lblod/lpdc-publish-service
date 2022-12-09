@@ -235,20 +235,21 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint.
 
-        OPTIONAL { ?s lpdcExt:address ?address. }
+        OPTIONAL {
+          ?s lpdcExt:address ?address.
+            OPTIONAL { ?address adres:postcode ?postcode. }
+            OPTIONAL { ?address adres:Straatnaam ?streetname. }
+            OPTIONAL { ?address adres:land ?country. }
+            OPTIONAL { ?address adres:gemeentenaam ?municipality. }
+            OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
+            OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
+            OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
+            OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
+        }
         OPTIONAL { ?s schema:email ?hasEmail. }
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
         OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
-        OPTIONAL { ?address adres:postcode ?postcode. }
-        OPTIONAL { ?address adres:Straatnaam ?streetname. }
-        OPTIONAL { ?address adres:land ?country. }
-        OPTIONAL { ?address adres:gemeentenaam ?municipality. }
-        OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
-        OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
-        OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
-        OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
-
       }`;
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
