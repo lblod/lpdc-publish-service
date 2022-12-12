@@ -220,7 +220,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
           schema:url ?website.
-        ?address a <http://www.w3.org/ns/locn#Address>; 
+        ?address a <http://www.w3.org/ns/locn#Address>;
           adres:postcode ?postcode;
           adres:Straatnaam ?streetname;
           adres:land ?country;
@@ -235,20 +235,21 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           m8g:hasContactPoint ?s.
          ?s a schema:ContactPoint.
 
-        OPTIONAL { ?s lpdcExt:address ?address. }
+        OPTIONAL {
+          ?s lpdcExt:address ?address.
+            OPTIONAL { ?address adres:postcode ?postcode. }
+            OPTIONAL { ?address adres:Straatnaam ?streetname. }
+            OPTIONAL { ?address adres:land ?country. }
+            OPTIONAL { ?address adres:gemeentenaam ?municipality. }
+            OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
+            OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
+            OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
+            OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
+        }
         OPTIONAL { ?s schema:email ?hasEmail. }
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
         OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
-        OPTIONAL { ?address adres:postcode ?postcode. }
-        OPTIONAL { ?address adres:Straatnaam ?streetname. }
-        OPTIONAL { ?address adres:land ?country. }
-        OPTIONAL { ?address adres:gemeentenaam ?municipality. }
-        OPTIONAL { ?address adres:volledigAdres ?fullAdress. }
-        OPTIONAL { ?address adres:Adresvoorstelling.huisnummer ?houseNumber. }
-        OPTIONAL { ?address adres:Adresvoorstelling.busnummer ?mailbox. }
-        OPTIONAL { ?address locn:adminUnitL2 ?administrativeUnitLevel2. }
-
       }`;
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
@@ -362,4 +363,118 @@ function createResultObject(bindingsList) {
     }
   }
   return resultObject;
+}
+
+/*
+ * Workaround function to make sure the service is valid.
+ * It is meant to be used before sending
+ * Will focus on required fields we know are buggy ATM in the frontend
+ * Note: side effects!
+ * TODO: fix frontend
+ */
+export async function ensureValidService( publicService ){
+  const whereBlock = `
+    WHERE {
+      BIND(${sparqlEscapeUri(publicService)} as ?publicService)
+      GRAPH ?g {
+        {
+          VALUES ?p {
+            dct:description
+            dct:title
+          }
+         ?publicService a cpsv:PublicService.
+
+         BIND(?publicService as ?s)
+         ?s ?p ?o.
+        }
+        UNION {
+          VALUES ?type {
+            m8g:Requirement
+            cpsv:Rule
+            m8g:Cost
+            lpdcExt:FinancialAdvantage
+            schema:ContactPoint
+            foaf:Document
+            schema:WebSite
+          }
+          VALUES ?p {
+            dct:description
+            dct:title
+          }
+
+          ?publicService a cpsv:PublicService;
+            ?link ?s.
+          ?s ?p ?o;
+            a ?type.
+        }
+        UNION {
+          VALUES ?type {
+            m8g:Evidence
+            schema:WebSite
+          }
+          VALUES ?p {
+            dct:description
+            dct:title
+          }
+          ?publicService a cpsv:PublicService;
+            ?hopP ?hop.
+
+          ?hop ?hopPP ?s.
+          ?s ?p ?o;
+            a ?type.
+        }
+      }
+      FILTER(isLiteral(?o) && (datatype(?o) = xsd:string || langMatches(lang(?o), "en") || langMatches(lang(?o), "nl") ))
+      BIND(strlen(REPLACE(?o, " ", "") ) as ?len)
+      FILTER(?len <= 0)
+
+      BIND(
+      IF(LANG(?o),
+          STRLANG("-", LANG(?o)),
+          ?o)
+        AS ?updatedEmptyString
+      )
+    }
+  `;
+
+  // Cumbersome workaround for https://github.com/openlink/virtuoso-opensource/issues/1055
+  const triplesToDeleteQuery = `
+   ${prefixes}
+   SELECT DISTINCT ?g ?s ?p ?o
+   ${whereBlock}
+  `;
+
+  const quadsToDelete = (await query(triplesToDeleteQuery)).results.bindings || [];
+
+  const triplesToInsertQuery = `
+   ${prefixes}
+   SELECT DISTINCT ?g ?s ?p (?updatedEmptyString as ?o)
+   ${whereBlock}
+  `;
+
+  const quadsToInsert = (await query(triplesToInsertQuery)).results.bindings || [];
+
+  for(const quad of quadsToDelete) {
+    await update(
+      `
+      DELETE DATA {
+        GRAPH ${sparqlEscapeUri(quad.g.value)} {
+          ${bindingsToNT([ quad ])[0]}
+        }
+      }
+      `
+    );
+  }
+
+  for(const quad of quadsToInsert) {
+    await update(
+      `
+      INSERT DATA {
+        GRAPH ${sparqlEscapeUri(quad.g.value)} {
+          ${bindingsToNT([ quad ])[0]}
+        }
+      }
+      `
+    );
+  }
 }
