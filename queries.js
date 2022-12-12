@@ -220,7 +220,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
           schema:url ?website.
-        ?address a <http://www.w3.org/ns/locn#Address>; 
+        ?address a <http://www.w3.org/ns/locn#Address>;
           adres:postcode ?postcode;
           adres:Straatnaam ?streetname;
           adres:land ?country;
