@@ -1,5 +1,6 @@
 import * as jsonld from 'jsonld';
 import N3 from 'n3';
+import fetch from 'node-fetch';
 import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
 
 export async function putDataToIpdc(subjectsAndData) {
