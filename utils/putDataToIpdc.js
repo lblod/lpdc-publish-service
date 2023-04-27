@@ -28,9 +28,11 @@ export async function putDataToIpdc(subjectsAndData) {
   });
 
   if (!response.ok) {
-    throw new Error("something went wrong when submitting to ipdc: \n"+JSON.stringify(response));
+    throw new Error("Something went wrong when submitting to IPDC: \n" + "IPDC response: " + JSON.stringify(response) + "\n"
+                    + "Response status code: " + response.status + "\n"
+                    + "Data sent to IPDC: " + JSON.stringify(doc));
   }
-  else{
-    console.log("succesfully sent data to ipdc: \n"+JSON.stringify(doc))
+  else {
+    console.log("Successfully sent data to IPDC: \n" + JSON.stringify(doc));
   }
 }
