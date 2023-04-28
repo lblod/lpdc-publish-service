@@ -1,6 +1,6 @@
 {
   "name": "lpdc-publish-service",
-  "version": "0.8.0-rc2",
+  "version": "0.8.0",
   "description": "",
   "main": "app.js",
   "scripts": {
