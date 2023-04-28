@@ -1,8 +1,8 @@
 {
   "name": "lpdc-publish-service",
-  "version": "0.7.0",
+  "version": "0.8.0-rc2",
   "description": "",
-  "main": "app.ts",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
