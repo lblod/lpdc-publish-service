@@ -1,7 +1,31 @@
-# LPDC Publish service
+# LPDC (Lokale Producten- en Dienstencatalogus) - Publishing Service
+
+_Note_: Documentation is structured using [The software guidebook by Simon Brown](https://leanpub.com/documenting-software-architecture).
+
+LPDC Publishing Service is part of [LPDC - Digitaal loket](https://github.com/lblod/app-lpdc-digitaal-loket).
+
+# 1. Context
 
 This service publishes sent documents to a LDES feed.
 It requests document regularly using `cron`.
+
+# 2. Functional Overview
+
+# 3. Quality Attributes
+
+# 4. Constraints
+
+# 5. Principles
+
+# 6. Software Architecture
+
+# 7. Code
+
+# 8. Data
+
+# 9. Infrastructure Architecture
+
+# 10. Deployment
 
 ## Configuration
 
@@ -13,7 +37,7 @@ In order to configure this service, 3 environment variables need to be defined:
 - `LDES_ENDPOINT_HEADER_<key>`: [string]: A header key-value combination which should be send as part of the headers to the LDES ENDPOINT. E.g. LDES_ENDPOINT_HEADER_X-API-KEY: <api_key>.
 - `LOG_INCOMING_DELTA`:  *(optional)* log the incoming deltas or not.
 
-### Docker-compose configuration
+## Docker-compose configuration
 
 For using this service in a docker-compose stack, the following example can be used
 
@@ -26,3 +50,10 @@ lpdc-push-to-producer:
       LDES_FOLDER: "foldername"
       LOG_INCOMING_DELTA: "true"
 ```
+
+# 11. Operation and Support
+
+# 12. Development Environment
+
+# 13. Decision Log
+
