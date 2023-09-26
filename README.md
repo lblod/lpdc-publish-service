@@ -2,7 +2,7 @@
 
 _Note_: Documentation is structured using [The software guidebook by Simon Brown](https://leanpub.com/documenting-software-architecture).
 
-LPDC Publishing Service is part of [LPDC - Digitaal loket](https://github.com/lblod/app-lpdc-digitaal-loket/tree/kunlabora). This contains general documentation. Specific documentation to be found in this project.
+LPDC Publishing Service is part of [LPDC - Digitaal loket](https://github.com/lblod/app-lpdc-digitaal-loket/tree/development). This contains general documentation. Specific documentation to be found in this project.
 
 # 1. Context
 

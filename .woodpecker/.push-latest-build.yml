@@ -9,9 +9,9 @@ pipeline:
     image: woodpeckerci/plugin-trigger
     settings:
       repositories:
-        - lblod/app-lpdc-digitaal-loket@kunlabora
+        - lblod/app-lpdc-digitaal-loket@development
       token:
         from_secret: woodpecker_token
 when:
-  branch: kunlabora
+  branch: development
   event: push
