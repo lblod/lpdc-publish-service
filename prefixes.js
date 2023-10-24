@@ -23,4 +23,5 @@ export const prefixes = `
   PREFIX locn: <http://www.w3.org/ns/locn>
   PREFIX adres: <https://data.vlaanderen.be/ns/adres#>
   PREFIX as:  <https://www.w3.org/ns/activitystreams#>
+  PREFIX sh: <http://www.w3.org/ns/shacl#>
 `;
