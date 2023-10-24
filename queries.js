@@ -282,14 +282,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a schema:WebSite;
           dct:description ?description;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           rdfs:seeAlso ?s.
         ?s a schema:WebSite;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
         OPTIONAL { ?s dct:description ?description. }
       }`;
   const websiteData = await query(websiteQuery);
