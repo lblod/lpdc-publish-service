@@ -118,14 +118,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a m8g:Requirement;
           dct:description ?description;
           m8g:hasSupportingEvidence ?hasSupportingEvidence;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
         OPTIONAL{ ?s m8g:hasSupportingEvidence ?hasSupportingEvidence. }
       }`;
   const requirementData = await query(requirementQuery);
@@ -164,14 +166,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a cpsv:Rule;
           lpdcExt:hasWebsites ?hasWebsites;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
         OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsites. }
       }`;
 
@@ -202,14 +206,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       CONSTRUCT {
         ?s a lpdcExt:FinancialAdvantage;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           cpsv:produces ?s.
 
        ?s a lpdcExt:FinancialAdvantage;
-            dct:title ?name.
+            dct:title ?name;
+            sh:order ?order.
        OPTIONAL { ?s dct:description ?description. }
 
       }`;
