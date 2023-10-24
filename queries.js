@@ -183,14 +183,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       CONSTRUCT {
         ?s a m8g:Cost;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }`;
   const costData = await query(costQuery);
   resultBindings.push(costData.results.bindings);
