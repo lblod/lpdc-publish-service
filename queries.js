@@ -230,7 +230,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:email ?hasEmail;
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
-          schema:url ?website.
+          schema:url ?website;
+          sh:order ?order.
         ?address a <http://www.w3.org/ns/locn#Address>;
           adres:postcode ?postcode;
           adres:Straatnaam ?streetname;
@@ -244,7 +245,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       WHERE {
         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
           m8g:hasContactPoint ?s.
-         ?s a schema:ContactPoint.
+        ?s a schema:ContactPoint;
+           sh:order ?order.
 
         OPTIONAL {
           ?s lpdcExt:address ?address.
