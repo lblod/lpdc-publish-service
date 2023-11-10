@@ -74,13 +74,14 @@ new CronJob( CRON_PATTERN, async () => {
 
     for(const service of unpublishedServices) {
       try {
-        const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
         try {
-          await ensureValidService(service.publicservice.value);
+          await ensureValidService(service?.publicservice?.value);
         } catch(error) {
           console.error(`Could ensure valid service for ${service?.publicservice?.value}`, error);
         }
+
+        const subjectsAndData = await getPublicServiceDetails(service?.publicservice?.value);
 
         if(POST_TO_LDES_ENABLED) {
           for(const subject of Object.keys(subjectsAndData)) {
@@ -91,9 +92,9 @@ new CronJob( CRON_PATTERN, async () => {
           console.log(`POST TO LDES disabled, skipping`);
         }
         await putDataToIpdc(subjectsAndData);
-        await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
+        await updateStatusPublicService(service?.publicservice?.value, STATUS_PUBLISHED_URI);
 
-        console.log(`Successfully published ${service.publicservice.value}`);
+        console.log(`Successfully published ${service?.publicservice?.value}`);
       }
       catch(e) {
         console.error(`Could not publish ${service?.publicservice?.value}`, e);
