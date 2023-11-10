@@ -76,7 +76,11 @@ new CronJob( CRON_PATTERN, async () => {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
-        await ensureValidService(service.publicservice.value);
+        try {
+          await ensureValidService(service.publicservice.value);
+        } catch(error) {
+          console.error(`Could ensure valid service for ${service?.publicservice?.value}`, error);
+        }
 
         if(POST_TO_LDES_ENABLED) {
           for(const subject of Object.keys(subjectsAndData)) {
@@ -92,7 +96,7 @@ new CronJob( CRON_PATTERN, async () => {
         console.log(`Successfully published ${service.publicservice.value}`);
       }
       catch(e) {
-        console.error(e);
+        console.error(`Could not publish ${service?.publicservice?.value}`, e);
       }
     }
   } catch(e){
