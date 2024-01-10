@@ -2,7 +2,7 @@ import { app, errorHandler, sparqlEscapeUri } from 'mu';
 import { CronJob } from 'cron';
 import bodyparser from 'body-parser';
 import fetch  from 'node-fetch';
-import { getPublicServiceDetails, getServicesToPublish, ensureValidService, updateStatusPublicService, STATUS_PUBLISHED_URI } from './queries';
+import { getPublicServiceDetails, getServicesToPublish, updateStatusPublicService, STATUS_PUBLISHED_URI } from './queries';
 import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
 import { putDataToIpdc } from './utils/putDataToIpdc';
 import {
@@ -74,13 +74,6 @@ new CronJob( CRON_PATTERN, async () => {
 
     for(const service of unpublishedServices) {
       try {
-
-        try {
-          await ensureValidService(service.publicservice.value);
-        } catch(error) {
-          console.error(`Could not ensure valid service for ${service?.publicservice?.value}`, error);
-        }
-
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
         if(POST_TO_LDES_ENABLED) {
