@@ -7,7 +7,7 @@ import { bindingsToNT } from "./utils/bindingsToNT";
 // - add label STATUS_PUBLISHED_URI, with migration
 export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
 export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/a7d01120-6f93-11ed-bcb8-a144c50c46d7";
-const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
+const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 
 /*
  * Poll data from any graphs
@@ -341,14 +341,14 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 export async function isPublishedService(service){
   // Note: the extra check on tombstone,
   //   is because service can be deleted before delta gets processed
-  const conceptUri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
+  const ontwerpUri = "http://lblod.data.gift/concepts/instance-status/ontwerp";
   const queryString = `
     ${prefixes}
     ASK {
       {
         ${sparqlEscapeUri(service)}
           a cpsv:PublicService ;
-          adms:status ${sparqlEscapeUri(conceptUri)};
+          adms:status ${sparqlEscapeUri(ontwerpUri)};
           schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
       }
       UNION {
