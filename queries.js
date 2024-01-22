@@ -5,8 +5,8 @@ import { bindingsToNT } from "./utils/bindingsToNT";
 
 //TODO:
 // - add label STATUS_PUBLISHED_URI, with migration
-export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
-export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/a7d01120-6f93-11ed-bcb8-a144c50c46d7";
+export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/publication-status/gepubliceerd";
+export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
 const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 
 /*
