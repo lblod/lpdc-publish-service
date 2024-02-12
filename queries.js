@@ -1,5 +1,5 @@
 import { prefixes } from "./prefixes";
-import { sparqlEscapeUri } from 'mu';
+import { sparqlEscapeUri, sparqlEscapeDateTime } from 'mu';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
 
@@ -55,11 +55,13 @@ export async function updateStatusPublicService(uri, status) {
   DELETE {
     GRAPH ?g {
      ?subject schema:publication ?publicationStatus.
+     ?subject schema:datePublished ?datePublished.
     }
   }
   INSERT {
     GRAPH ?g {
       ?subject schema:publication ${sparqlEscapeUri(status)}.
+      ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
     }
   }
   WHERE {
@@ -67,6 +69,7 @@ export async function updateStatusPublicService(uri, status) {
     GRAPH ?g {
      ?subject a ?foo.
      OPTIONAL { ?subject schema:publication ?publicationStatus. }.
+     OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
