@@ -11,6 +11,7 @@ import {
   LDES_FOLDER,
   LDES_ENDPOINT_HEADER_PREFIX
 } from './env-config';
+import {clearPublicationErrors} from "./utils/publication-error";
 
 const POST_TO_LDES_ENABLED = process.env.POST_TO_LDES_ENABLED == 'true' || false;
 
@@ -49,7 +50,7 @@ new CronJob( CRON_PATTERN, async () => {
     const unpublishedServices = await getServicesToPublish();
 
     console.log(`Found ${unpublishedServices.length} to publish`);
-
+    await clearPublicationErrors();
     for(const service of unpublishedServices) {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
@@ -62,7 +63,7 @@ new CronJob( CRON_PATTERN, async () => {
         else {
           console.log(`POST TO LDES disabled, skipping`);
         }
-        await putDataToIpdc(subjectsAndData);
+        await putDataToIpdc(service.graph.value, service.publicservice.value, subjectsAndData);
         await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
 
         console.log(`Successfully published ${service.publicservice.value}`);

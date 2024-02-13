@@ -15,7 +15,7 @@ const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 export async function getServicesToPublish() {
    const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice WHERE {
+    SELECT DISTINCT ?publicservice ?graph WHERE {
      {
        GRAPH ?graph {
          ?publicservice a cpsv:PublicService;

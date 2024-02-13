@@ -2,8 +2,9 @@ import * as jsonld from 'jsonld';
 import N3 from 'n3';
 import fetch from 'node-fetch';
 import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
+import {createPublicationError} from "./publication-error";
 
-export async function putDataToIpdc(subjectsAndData) {
+export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
   let ttl = '';
   for (const subject of Object.keys(subjectsAndData)) {
     const body = subjectsAndData[subject].body;
@@ -13,6 +14,16 @@ export async function putDataToIpdc(subjectsAndData) {
   const parser = new N3.Parser({ format: 'text/turtle' });
 
   const quads = parser.parse(ttl);
+
+  // http://mu.semte.ch/graphs/organizations/73840d393bd94828f0903e8357c7f328d4bf4b8fbd63adbfa443e784f056a589/LoketLB-LPDCGebruiker
+  const bestuurseenheidId = graph.split("/")[5];
+  const bestuurseenheidIri = `http://data.lblod.info/id/bestuurseenheden/${bestuurseenheidId}`;
+
+  const titleQuad = quads
+    .filter(q => q.subject.value === instanceIri && q.predicate.value === 'http://purl.org/dc/terms/title')
+    .filter(q => q.object.language.startsWith('nl'));
+  const title = titleQuad[0]?.object?.value;
+
 
   const fromRdf = await jsonld.fromRDF(quads);
   const doc = await jsonld.expand(fromRdf);
@@ -30,6 +41,7 @@ export async function putDataToIpdc(subjectsAndData) {
 
   if (!response.ok) {
     const responseBody = await getResponseBody(response);
+    await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri);
     throw new Error("Something went wrong when submitting to IPDC: \n" + "IPDC response: " + JSON.stringify(responseBody) + "\n"
                     + "Response status code: " + response.status + "\n"
                     + "Data sent to IPDC: " + JSON.stringify(doc));
