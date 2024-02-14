@@ -1,7 +1,7 @@
 import * as jsonld from 'jsonld';
 import N3 from 'n3';
 import fetch from 'node-fetch';
-import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
+import {IPDC_JSON_ENDPOINT, IPDC_X_API_KEY} from '../env-config';
 import {createPublicationError} from "./publication-error";
 
 export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
@@ -11,7 +11,7 @@ export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
     ttl += body;
   }
 
-  const parser = new N3.Parser({ format: 'text/turtle' });
+  const parser = new N3.Parser({format: 'text/turtle'});
 
   const quads = parser.parse(ttl);
 
@@ -23,6 +23,18 @@ export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
     .filter(q => q.subject.value === instanceIri && q.predicate.value === 'http://purl.org/dc/terms/title')
     .filter(q => q.object.language.startsWith('nl'));
   const title = titleQuad[0]?.object?.value;
+
+  const dateSent = quads
+    .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/dateSent')
+    ?.object?.value;
+
+  const datePublished = quads
+    .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/datePublished')
+    ?.object?.value;
+
+  const dateDeleted = quads
+    .find(q => q.subject.value === instanceIri && q.predicate.value === 'https://www.w3.org/ns/activitystreams#deleted')
+    ?.object?.value;
 
 
   const fromRdf = await jsonld.fromRDF(quads);
@@ -41,12 +53,11 @@ export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
 
   if (!response.ok) {
     const responseBody = await getResponseBody(response);
-    await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri);
+    await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri, dateSent ?? dateDeleted, datePublished);
     throw new Error("Something went wrong when submitting to IPDC: \n" + "IPDC response: " + JSON.stringify(responseBody) + "\n"
-                    + "Response status code: " + response.status + "\n"
-                    + "Data sent to IPDC: " + JSON.stringify(doc));
-  }
-  else {
+      + "Response status code: " + response.status + "\n"
+      + "Data sent to IPDC: " + JSON.stringify(doc));
+  } else {
     console.log("Successfully sent data to IPDC: \n" + JSON.stringify(doc));
   }
 }
