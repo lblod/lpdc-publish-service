@@ -53,8 +53,11 @@ export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
 
   if (!response.ok) {
     const responseBody = await getResponseBody(response);
-    //TODO LPDC-909: als wegschrijven error mislukt, dan zijn we de context info kwijt, misschien hier een try catch rond doen ?
-    await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri, dateSent ?? dateDeleted, datePublished);
+    try {
+      await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri, dateSent ?? dateDeleted, datePublished);
+    } catch (e) {
+      console.log('Could not save publicationError', e);
+    }
     throw new Error("Something went wrong when submitting to IPDC: \n" + "IPDC response: " + JSON.stringify(responseBody) + "\n"
       + "Response status code: " + response.status + "\n"
       + "Data sent to IPDC: " + JSON.stringify(doc));
