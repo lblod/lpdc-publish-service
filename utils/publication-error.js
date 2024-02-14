@@ -9,7 +9,6 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
   const triples = [
     `${sparqlEscapeUri(publicationErrorIri)} a <http://data.lblod.info/vocabularies/lpdc/instance-publication-error> .`,
     errorCode ? `${sparqlEscapeUri(publicationErrorIri)} http:statusCode ${sparqlEscapeInt(errorCode)} .` : undefined,
-    errorCode ? `${sparqlEscapeUri(publicationErrorIri)} http:statusCode ${sparqlEscapeInt(errorCode)} .` : undefined,
     errorMessage ? `${sparqlEscapeUri(publicationErrorIri)} schema:error ${sparqlEscapeString(errorMessage)} .` : undefined,
     instanceIri ? `${sparqlEscapeUri(publicationErrorIri)} dct:source ${sparqlEscapeUri(instanceIri)} .` : undefined,
     title ? `${sparqlEscapeUri(publicationErrorIri)} dct:title ${sparqlEscapeString(title)} .` : undefined,
