@@ -1,19 +1,19 @@
-import { prefixes } from "./prefixes";
-import { sparqlEscapeUri, sparqlEscapeDateTime } from 'mu';
-import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
-import { bindingsToNT } from "./utils/bindingsToNT";
+import {prefixes} from "./prefixes";
+import {sparqlEscapeUri, sparqlEscapeDateTime} from 'mu';
+import {querySudo as query, updateSudo as update} from "@lblod/mu-auth-sudo";
+import {bindingsToNT} from "./utils/bindingsToNT";
 
 //TODO:
 // - add label STATUS_PUBLISHED_URI, with migration
-export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/publication-status/gepubliceerd";
-export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
+export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
+export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
 const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 
 /*
  * Poll data from any graphs
  */
 export async function getServicesToPublish() {
-   const queryString = `
+  const queryString = `
     ${prefixes}
     SELECT DISTINCT ?publicservice ?graph WHERE {
      {
@@ -77,7 +77,7 @@ export async function updateStatusPublicService(uri, status) {
 };
 
 
-export async function getPublicServiceDetails( publicServiceUri ) {
+export async function getPublicServiceDetails(publicServiceUri) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const resultBindings = [];
 
@@ -89,11 +89,27 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       GRAPH ?g {
         ?s a cpsv:PublicService;
           ?p ?o.
+
+        FILTER(STR(?p) != "http://data.europa.eu/m8g/hasLegalResource")
       }
     }
   `;
   const queryResult = await query(publicServiceQuery);
   resultBindings.push(queryResult.results.bindings);
+
+  const legalResourceQuery = `
+    ${prefixes}
+    CONSTRUCT {
+      ?s <http://data.europa.eu/m8g/hasLegalResource> ?url .
+    } WHERE {
+        BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+        ?s a cpsv:PublicService .
+        ?s <http://data.europa.eu/m8g/hasLegalResource> ?legalResourceId .
+        ?legalResourceId rdfs:seeAlso ?url .
+    }
+  `
+  const legalResourceData = await query(legalResourceQuery);
+  resultBindings.push(legalResourceData.results.bindings);
 
   const evidenceQuery = `
     ${prefixes}
@@ -341,7 +357,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 /*
  * takes a service object and returns if it has been published
  */
-export async function isPublishedService(service){
+export async function isPublishedService(service) {
   // Note: the extra check on tombstone,
   //   is because service can be deleted before delta gets processed
   const ontwerpUri = "http://lblod.data.gift/concepts/instance-status/ontwerp";
@@ -360,7 +376,7 @@ export async function isPublishedService(service){
             schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
         }
     }`;
-  const queryData = await query( queryString );
+  const queryData = await query(queryString);
   return queryData.boolean;
 }
 
@@ -370,15 +386,14 @@ export async function isPublishedService(service){
  * The triples to be published are bundled per suject, so everything gets properly versioned
  */
 function createResultObject(bindingsList) {
-  const  resultObject = {};
-  for(let bindings of bindingsList) {
-    const uniqueSubjects = [ ...new Set(bindings.map(b => b.s.value)) ];
-    for(const subject of uniqueSubjects) {
-      const bindingsForSubject = bindings.filter(b => b.s.value == subject);
-      resultObject[subject] = {
-        body: bindingsToNT(bindingsForSubject).join('\r\n')+"\r\n"
-      };
-    }
+  const resultObject = {};
+  const bindings = bindingsList.flat();
+  const uniqueSubjects = [...new Set(bindings.map(b => b.s.value))];
+  for (const subject of uniqueSubjects) {
+    const bindingsForSubject = bindings.filter(b => b.s.value == subject);
+    resultObject[subject] = {
+      body: bindingsToNT(bindingsForSubject).join('\r\n') + "\r\n"
+    };
   }
   return resultObject;
 }
