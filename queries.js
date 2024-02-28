@@ -100,13 +100,16 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const legalResourceQuery = `
     ${prefixes}
     CONSTRUCT {
-      ?s <http://data.europa.eu/m8g/hasLegalResource> ?url .
+        ?s <http://data.europa.eu/m8g/hasLegalResource> ?iriUrl.
     } WHERE {
-        BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+        VALUES ?s {
+            ${sparqlEscapeUri(publicServiceUri)}
+        }
         ?s a cpsv:PublicService .
         ?s <http://data.europa.eu/m8g/hasLegalResource> ?legalResourceId .
-        ?legalResourceId rdfs:seeAlso ?url .
-    }
+        ?legalResourceId schema:url ?url .
+        BIND(IRI(?url) AS ?iriUrl)
+  }
   `
   const legalResourceData = await query(legalResourceQuery);
   resultBindings.push(legalResourceData.results.bindings);
