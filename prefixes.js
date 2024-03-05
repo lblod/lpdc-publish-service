@@ -10,7 +10,6 @@ export const prefixes = `
   PREFIX lblodLpdc: <http://data.lblod.info/id/public-services/>
   PREFIX lblodIpdcLpdc: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
   PREFIX dcat: <http://www.w3.org/ns/dcat#>
-  PREFIX lang: <http://publications.europa.eu/resource/authority/language/>
   PREFIX lblodOrg: <http://data.lblod.info/id/concept/organisatie/>
   PREFIX lblodIpdcThema: <http://data.lblod.info/id/concept/ipdc-thema/>
   PREFIX belgif: <http://vocab.belgif.be/ns/publicservice#>
