@@ -89,8 +89,6 @@ export async function getPublicServiceDetails(publicServiceUri) {
       GRAPH ?g {
         ?s a cpsv:PublicService;
           ?p ?o.
-
-        FILTER(STR(?p) != "http://data.europa.eu/m8g/hasLegalResource")
       }
     }
   `;
@@ -100,15 +98,15 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const legalResourceQuery = `
     ${prefixes}
     CONSTRUCT {
-        ?s <http://data.europa.eu/m8g/hasLegalResource> ?iriUrl.
+        ?legalResourceId a eli:LegalResource;
+          schema:url ?location;
+          sh:order ?order.
     } WHERE {
-        VALUES ?s {
-            ${sparqlEscapeUri(publicServiceUri)}
-        }
-        ?s a cpsv:PublicService .
-        ?s <http://data.europa.eu/m8g/hasLegalResource> ?legalResourceId .
-        ?legalResourceId schema:url ?url .
-        BIND(IRI(?url) AS ?iriUrl)
+        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+            m8g:hasLegalResource ?legalResourceId.
+        ?legalResourceId a eli:LegalResource;
+          schema:url ?location;
+          sh:order ?order.
   }
   `
   const legalResourceData = await query(legalResourceQuery);
@@ -393,7 +391,7 @@ function createResultObject(bindingsList) {
   const bindings = bindingsList.flat();
   const uniqueSubjects = [...new Set(bindings.map(b => b.s.value))];
   for (const subject of uniqueSubjects) {
-    const bindingsForSubject = bindings.filter(b => b.s.value == subject);
+    const bindingsForSubject = bindings.filter(b => b.s.value === subject);
     resultObject[subject] = {
       body: bindingsToNT(bindingsForSubject).join('\r\n') + "\r\n"
     };
