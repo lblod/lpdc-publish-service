@@ -95,8 +95,6 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const queryResult = await query(publicServiceQuery);
   resultBindings.push(queryResult.results.bindings);
 
-  //TODO LPDC-1035: test the optional dct:title (e2e test)
-  //TODO LPDC-1035: test the optional dct:description (e2e test)
   const legalResourceQuery = `
     ${prefixes}
     CONSTRUCT {
@@ -114,7 +112,6 @@ export async function getPublicServiceDetails(publicServiceUri) {
 
         OPTIONAL { ?legalResourceId dct:title ?title. }
         OPTIONAL { ?legalResourceId dct:description ?description. }
-
   }
   `
   const legalResourceData = await query(legalResourceQuery);
@@ -243,9 +240,8 @@ export async function getPublicServiceDetails(publicServiceUri) {
 
        ?s a lpdcExt:FinancialAdvantage;
             dct:title ?name;
+            dct:description ?description;
             sh:order ?order.
-       OPTIONAL { ?s dct:description ?description. }
-
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
   resultBindings.push(financialAdvantageData.results.bindings);
@@ -289,8 +285,8 @@ export async function getPublicServiceDetails(publicServiceUri) {
         }
         OPTIONAL { ?s schema:email ?hasEmail. }
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
-        OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
+        OPTIONAL { ?s schema:openingHours ?openingHours. }
       }`;
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
