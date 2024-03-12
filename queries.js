@@ -95,10 +95,14 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const queryResult = await query(publicServiceQuery);
   resultBindings.push(queryResult.results.bindings);
 
+  //TODO LPDC-1035: test the optional dct:title (e2e test)
+  //TODO LPDC-1035: test the optional dct:description (e2e test)
   const legalResourceQuery = `
     ${prefixes}
     CONSTRUCT {
         ?legalResourceId a eli:LegalResource;
+          dct:title ?title;
+          dct:description ?description;
           schema:url ?location;
           sh:order ?order.
     } WHERE {
@@ -107,6 +111,10 @@ export async function getPublicServiceDetails(publicServiceUri) {
         ?legalResourceId a eli:LegalResource;
           schema:url ?location;
           sh:order ?order.
+
+        OPTIONAL { ?legalResourceId dct:title ?title. }
+        OPTIONAL { ?legalResourceId dct:description ?description. }
+
   }
   `
   const legalResourceData = await query(legalResourceQuery);
