@@ -189,7 +189,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
   ${prefixes}
   CONSTRUCT {
         ?s a cpsv:Rule;
-          lpdcExt:hasWebsites ?hasWebsites;
+          lpdcExt:hasWebsite ?hasWebsite;
           dct:description ?description;
           dct:title ?name;
           sh:order ?order.
@@ -201,7 +201,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           dct:description ?description;
           dct:title ?name;
           sh:order ?order.
-        OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsites. }
+        OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsite. }
       }`;
 
   const procedureData = await query(procedureQuery);
