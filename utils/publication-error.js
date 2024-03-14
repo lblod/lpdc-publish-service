@@ -7,7 +7,7 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
   const publicationErrorIri = `http://data.lblod.info/id/instance-publication-error/${uuid()}`;
 
   const triples = [
-    `${sparqlEscapeUri(publicationErrorIri)} a <http://data.lblod.info/vocabularies/lpdc/instance-publication-error> .`,
+    `${sparqlEscapeUri(publicationErrorIri)} a lpdc:InstancePublicationError .`,
     errorCode ? `${sparqlEscapeUri(publicationErrorIri)} http:statusCode ${sparqlEscapeInt(errorCode)} .` : undefined,
     errorMessage ? `${sparqlEscapeUri(publicationErrorIri)} schema:error ${sparqlEscapeString(errorMessage)} .` : undefined,
     instanceIri ? `${sparqlEscapeUri(publicationErrorIri)} dct:source ${sparqlEscapeUri(instanceIri)} .` : undefined,
@@ -40,7 +40,7 @@ export async function clearPublicationErrors() {
     }
   } WHERE {
     GRAPH <http://mu.semte.ch/graphs/lpdc/ipdc-publication-errors> {
-        ?s a <http://data.lblod.info/vocabularies/lpdc/instance-publication-error> .
+        ?s a <http://data.lblod.info/vocabularies/lpdc/InstancePublicationError> .
         ?s ?p ?o.
     }
   }

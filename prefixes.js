@@ -1,6 +1,5 @@
 export const prefixes = `
   PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX ns1: <http://data.lblod.info/vocabularies/lpdc-ipdc/>
   PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
   PREFIX cpsv: <http://purl.org/vocab/cpsv#>
@@ -9,6 +8,7 @@ export const prefixes = `
   PREFIX m8g: <http://data.europa.eu/m8g/>
   PREFIX lblodLpdc: <http://data.lblod.info/id/public-services/>
   PREFIX lblodIpdcLpdc: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
+  PREFIX lpdc: <http://data.lblod.info/vocabularies/lpdc/>
   PREFIX dcat: <http://www.w3.org/ns/dcat#>
   PREFIX lblodOrg: <http://data.lblod.info/id/concept/organisatie/>
   PREFIX lblodIpdcThema: <http://data.lblod.info/id/concept/ipdc-thema/>
