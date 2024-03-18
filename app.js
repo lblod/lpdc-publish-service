@@ -1,10 +1,15 @@
-import { app, errorHandler } from 'mu';
-import { CronJob } from 'cron';
+import {app, errorHandler} from 'mu';
+import {CronJob} from 'cron';
 import bodyparser from 'body-parser';
-import fetch  from 'node-fetch';
-import { getPublicServiceDetails, getServicesToPublish, updateStatusPublicService, STATUS_PUBLISHED_URI } from './queries';
-import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
-import { putDataToIpdc } from './utils/putDataToIpdc';
+import fetch from 'node-fetch';
+import {
+  getPublicServiceDetails,
+  getServicesToPublish,
+  updateStatusPublicService,
+  STATUS_PUBLISHED_URI
+} from './queries';
+import {extractHeadersFromEnv} from './utils/extractHeadersFromEnv';
+import {putDataToIpdc} from './utils/putDataToIpdc';
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
@@ -35,7 +40,7 @@ async function postDataToLDES(uri, body) {
       body: body,
     });
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(response);
     }
 
@@ -45,36 +50,43 @@ async function postDataToLDES(uri, body) {
   }
 }
 
-new CronJob( CRON_PATTERN, async () => {
-  try{
+let inProgress = false;
+
+new CronJob(CRON_PATTERN, async () => {
+  try {
+    if (inProgress) {
+      console.log('Process already in progress');
+      return;
+    }
+    inProgress = true;
     const unpublishedServices = await getServicesToPublish();
 
     console.log(`Found ${unpublishedServices.length} to publish`);
     await clearPublicationErrors();
-    for(const service of unpublishedServices) {
+    for (const service of unpublishedServices) {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
-        if(POST_TO_LDES_ENABLED) {
-          for(const subject of Object.keys(subjectsAndData)) {
+        if (POST_TO_LDES_ENABLED) {
+          for (const subject of Object.keys(subjectsAndData)) {
             await postDataToLDES(subject, subjectsAndData[subject].body);
           }
-        }
-        else {
+        } else {
           console.log(`POST TO LDES disabled, skipping`);
         }
         await putDataToIpdc(service.graph.value, service.publicservice.value, subjectsAndData);
         await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
 
         console.log(`Successfully published ${service.publicservice.value}`);
-      }
-      catch(e) {
+      } catch (e) {
         console.error(`Could not publish ${service.publicservice.value}`, e);
       }
     }
-  } catch(e){
+  } catch (e) {
     console.error('General error fetching data, retrying later');
     console.log(e);
+  } finally {
+    inProgress = false;
   }
 }, null, true);
 
