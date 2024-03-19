@@ -53,11 +53,11 @@ async function postDataToLDES(uri, body) {
 let inProgress = false;
 
 new CronJob(CRON_PATTERN, async () => {
+  if (inProgress) {
+    console.log('Process already in progress');
+    return;
+  }
   try {
-    if (inProgress) {
-      console.log('Process already in progress');
-      return;
-    }
     inProgress = true;
     const unpublishedServices = await getServicesToPublish();
 
