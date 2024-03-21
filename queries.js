@@ -291,25 +291,6 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
 
-  const documentQuery = `
-  ${prefixes}
-      CONSTRUCT {
-         ?s a foaf:Document;
-          dct:description ?description;
-          schema:url ?document;
-          dct:title ?title.
-      }
-      WHERE {
-         ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
-          lpdcExt:attachment ?s.
-         ?s a foaf:Document;
-          dct:description ?description;
-          schema:url ?document;
-          dct:title ?title.
-      }`;
-  const documentData = await query(documentQuery);
-  resultBindings.push(documentData.results.bindings);
-
   const websiteQuery = `
   ${prefixes}
       CONSTRUCT {
