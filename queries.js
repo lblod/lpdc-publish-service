@@ -1,24 +1,24 @@
-import { prefixes } from "./prefixes";
-import { sparqlEscapeUri } from 'mu';
-import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
-import { bindingsToNT } from "./utils/bindingsToNT";
+import {prefixes} from "./prefixes";
+import {sparqlEscapeUri, sparqlEscapeDateTime} from 'mu';
+import {querySudo as query, updateSudo as update} from "@lblod/mu-auth-sudo";
+import {bindingsToNT} from "./utils/bindingsToNT";
 
 //TODO:
 // - add label STATUS_PUBLISHED_URI, with migration
-export const STATUS_PUBLISHED_URI ="http://lblod.data.gift/concepts/3369bb10-1962-11ed-b07c-132292303e92";
-export const STATUS_TO_REPUBLISH_URI ="http://lblod.data.gift/concepts/a7d01120-6f93-11ed-bcb8-a144c50c46d7";
-const SENT_URI = "http://lblod.data.gift/concepts/9bd8d86d-bb10-4456-a84e-91e9507c374c";
+export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
+export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
+const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 
 /*
  * Poll data from any graphs
  */
 export async function getServicesToPublish() {
-   const queryString = `
+  const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice WHERE {
+    SELECT DISTINCT ?publicservice ?graph WHERE {
      {
        GRAPH ?graph {
-         ?publicservice a cpsv:PublicService;
+         ?publicservice a lpdcExt:InstancePublicService;
            adms:status ${sparqlEscapeUri(SENT_URI)}.
        }
        FILTER NOT EXISTS{
@@ -27,7 +27,7 @@ export async function getServicesToPublish() {
      }
      UNION {
         GRAPH ?graph {
-         ?publicservice a cpsv:PublicService;
+         ?publicservice a lpdcExt:InstancePublicService;
            adms:status ${sparqlEscapeUri(SENT_URI)};
            schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
        }
@@ -35,7 +35,7 @@ export async function getServicesToPublish() {
      UNION {
        GRAPH ?graph {
          ?publicservice a as:Tombstone;
-         as:formerType cpsv:PublicService;
+         as:formerType lpdcExt:InstancePublicService;
          schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
        }
      }
@@ -55,11 +55,13 @@ export async function updateStatusPublicService(uri, status) {
   DELETE {
     GRAPH ?g {
      ?subject schema:publication ?publicationStatus.
+     ?subject schema:datePublished ?datePublished.
     }
   }
   INSERT {
     GRAPH ?g {
       ?subject schema:publication ${sparqlEscapeUri(status)}.
+      ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
     }
   }
   WHERE {
@@ -67,6 +69,7 @@ export async function updateStatusPublicService(uri, status) {
     GRAPH ?g {
      ?subject a ?foo.
      OPTIONAL { ?subject schema:publication ?publicationStatus. }.
+     OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
@@ -74,7 +77,7 @@ export async function updateStatusPublicService(uri, status) {
 };
 
 
-export async function getPublicServiceDetails( publicServiceUri ) {
+export async function getPublicServiceDetails(publicServiceUri) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const resultBindings = [];
 
@@ -84,13 +87,35 @@ export async function getPublicServiceDetails( publicServiceUri ) {
     SELECT DISTINCT ?s ?p ?o {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
       GRAPH ?g {
-        ?s a cpsv:PublicService;
+        ?s a lpdcExt:InstancePublicService;
           ?p ?o.
       }
     }
   `;
   const queryResult = await query(publicServiceQuery);
   resultBindings.push(queryResult.results.bindings);
+
+  const legalResourceQuery = `
+    ${prefixes}
+    CONSTRUCT {
+        ?legalResourceId a eli:LegalResource;
+          dct:title ?title;
+          dct:description ?description;
+          schema:url ?location;
+          sh:order ?order.
+    } WHERE {
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+            m8g:hasLegalResource ?legalResourceId.
+        ?legalResourceId a eli:LegalResource;
+          schema:url ?location;
+          sh:order ?order.
+
+        OPTIONAL { ?legalResourceId dct:title ?title. }
+        OPTIONAL { ?legalResourceId dct:description ?description. }
+  }
+  `
+  const legalResourceData = await query(legalResourceQuery);
+  resultBindings.push(legalResourceData.results.bindings);
 
   const evidenceQuery = `
     ${prefixes}
@@ -100,7 +125,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           dct:title ?name.
     }
     WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
           m8g:hasSupportingEvidence ?s.
@@ -118,14 +143,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a m8g:Requirement;
           dct:description ?description;
           m8g:hasSupportingEvidence ?hasSupportingEvidence;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
         OPTIONAL{ ?s m8g:hasSupportingEvidence ?hasSupportingEvidence. }
       }`;
   const requirementData = await query(requirementQuery);
@@ -137,17 +164,20 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a schema:WebSite;
           dct:description ?description;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
+
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
 
         ?s a schema:WebSite;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
 
         OPTIONAL { ?s dct:description ?description. }
 
@@ -159,17 +189,19 @@ export async function getPublicServiceDetails( publicServiceUri ) {
   ${prefixes}
   CONSTRUCT {
         ?s a cpsv:Rule;
-          lpdcExt:hasWebsites ?hasWebsites;
+          lpdcExt:hasWebsite ?hasWebsite;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           dct:description ?description;
-          dct:title ?name.
-        OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsites. }
+          dct:title ?name;
+          sh:order ?order.
+        OPTIONAL { ?s lpdcExt:hasWebsite ?hasWebsite. }
       }`;
 
   const procedureData = await query(procedureQuery);
@@ -180,14 +212,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       CONSTRUCT {
         ?s a m8g:Cost;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }`;
   const costData = await query(costQuery);
   resultBindings.push(costData.results.bindings);
@@ -197,16 +231,17 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       CONSTRUCT {
         ?s a lpdcExt:FinancialAdvantage;
           dct:description ?description;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           cpsv:produces ?s.
 
        ?s a lpdcExt:FinancialAdvantage;
-            dct:title ?name.
-       OPTIONAL { ?s dct:description ?description. }
-
+            dct:title ?name;
+            dct:description ?description;
+            sh:order ?order.
       }`;
   const financialAdvantageData = await query(financialAdvantageQuery);
   resultBindings.push(financialAdvantageData.results.bindings);
@@ -219,7 +254,8 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           schema:email ?hasEmail;
           schema:telephone ?hasTelephone;
           schema:openingHours ?openingHours;
-          schema:url ?website.
+          schema:url ?website;
+          sh:order ?order.
         ?address a <http://www.w3.org/ns/locn#Address>;
           adres:postcode ?postcode;
           adres:Straatnaam ?streetname;
@@ -231,9 +267,10 @@ export async function getPublicServiceDetails( publicServiceUri ) {
           locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           m8g:hasContactPoint ?s.
-         ?s a schema:ContactPoint.
+        ?s a schema:ContactPoint;
+           sh:order ?order.
 
         OPTIONAL {
           ?s lpdcExt:address ?address.
@@ -248,30 +285,11 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         }
         OPTIONAL { ?s schema:email ?hasEmail. }
         OPTIONAL { ?s schema:telephone ?hasTelephone. }
-        OPTIONAL { ?s schema:openingHours ?openingHours. }
         OPTIONAL { ?s schema:url ?website. }
+        OPTIONAL { ?s schema:openingHours ?openingHours. }
       }`;
   const contactPointData = await query(contactPointQuery);
   resultBindings.push(contactPointData.results.bindings);
-
-  const documentQuery = `
-  ${prefixes}
-      CONSTRUCT {
-         ?s a foaf:Document;
-          dct:description ?description;
-          schema:url ?document;
-          dct:title ?title.
-      }
-      WHERE {
-         ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
-          lpdcExt:attachment ?s.
-         ?s a foaf:Document;
-          dct:description ?description;
-          schema:url ?document;
-          dct:title ?title.
-      }`;
-  const documentData = await query(documentQuery);
-  resultBindings.push(documentData.results.bindings);
 
   const websiteQuery = `
   ${prefixes}
@@ -279,14 +297,16 @@ export async function getPublicServiceDetails( publicServiceUri ) {
         ?s a schema:WebSite;
           dct:description ?description;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a cpsv:PublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
           rdfs:seeAlso ?s.
         ?s a schema:WebSite;
           schema:url ?location;
-          dct:title ?name.
+          dct:title ?name;
+          sh:order ?order.
         OPTIONAL { ?s dct:description ?description. }
       }`;
   const websiteData = await query(websiteQuery);
@@ -307,7 +327,7 @@ export async function getPublicServiceDetails( publicServiceUri ) {
       }
       GRAPH ?g {
         ?s a as:Tombstone;
-          as:formerType cpsv:PublicService;
+          as:formerType lpdcExt:InstancePublicService;
           ?p ?o.
       }
     }
@@ -323,26 +343,26 @@ export async function getPublicServiceDetails( publicServiceUri ) {
 /*
  * takes a service object and returns if it has been published
  */
-export async function isPublishedService(service){
+export async function isPublishedService(service) {
   // Note: the extra check on tombstone,
   //   is because service can be deleted before delta gets processed
-  const conceptUri = "http://lblod.data.gift/concepts/79a52da4-f491-4e2f-9374-89a13cde8ecd";
+  const ontwerpUri = "http://lblod.data.gift/concepts/instance-status/ontwerp";
   const queryString = `
     ${prefixes}
     ASK {
       {
         ${sparqlEscapeUri(service)}
-          a cpsv:PublicService ;
-          adms:status ${sparqlEscapeUri(conceptUri)};
+          a lpdcExt:InstancePublicService ;
+          adms:status ${sparqlEscapeUri(ontwerpUri)};
           schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
       }
       UNION {
         ${sparqlEscapeUri(service)} a as:Tombstone;
-            as:formerType cpsv:PublicService;
+            as:formerType lpdcExt:InstancePublicService;
             schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
         }
     }`;
-  const queryData = await query( queryString );
+  const queryData = await query(queryString);
   return queryData.boolean;
 }
 
@@ -352,129 +372,14 @@ export async function isPublishedService(service){
  * The triples to be published are bundled per suject, so everything gets properly versioned
  */
 function createResultObject(bindingsList) {
-  const  resultObject = {};
-  for(let bindings of bindingsList) {
-    const uniqueSubjects = [ ...new Set(bindings.map(b => b.s.value)) ];
-    for(const subject of uniqueSubjects) {
-      const bindingsForSubject = bindings.filter(b => b.s.value == subject);
-      resultObject[subject] = {
-        body: bindingsToNT(bindingsForSubject).join('\r\n')+"\r\n"
-      };
-    }
+  const resultObject = {};
+  const bindings = bindingsList.flat();
+  const uniqueSubjects = [...new Set(bindings.map(b => b.s.value))];
+  for (const subject of uniqueSubjects) {
+    const bindingsForSubject = bindings.filter(b => b.s.value === subject);
+    resultObject[subject] = {
+      body: bindingsToNT(bindingsForSubject).join('\r\n') + "\r\n"
+    };
   }
   return resultObject;
-}
-
-/*
- * Workaround function to make sure the service is valid.
- * It is meant to be used before sending
- * Will focus on required fields we know are buggy ATM in the frontend
- * Note: side effects!
- * TODO: fix frontend
- */
-export async function ensureValidService( publicService ){
-  const whereBlock = `
-    WHERE {
-      BIND(${sparqlEscapeUri(publicService)} as ?publicService)
-      GRAPH ?g {
-        {
-          VALUES ?p {
-            dct:description
-            dct:title
-          }
-         ?publicService a cpsv:PublicService.
-
-         BIND(?publicService as ?s)
-         ?s ?p ?o.
-        }
-        UNION {
-          VALUES ?type {
-            m8g:Requirement
-            cpsv:Rule
-            m8g:Cost
-            lpdcExt:FinancialAdvantage
-            schema:ContactPoint
-            foaf:Document
-            schema:WebSite
-          }
-          VALUES ?p {
-            dct:description
-            dct:title
-          }
-
-          ?publicService a cpsv:PublicService;
-            ?link ?s.
-          ?s ?p ?o;
-            a ?type.
-        }
-        UNION {
-          VALUES ?type {
-            m8g:Evidence
-            schema:WebSite
-          }
-          VALUES ?p {
-            dct:description
-            dct:title
-          }
-          ?publicService a cpsv:PublicService;
-            ?hopP ?hop.
-
-          ?hop ?hopPP ?s.
-          ?s ?p ?o;
-            a ?type.
-        }
-      }
-      FILTER(isLiteral(?o) && (datatype(?o) = xsd:string || langMatches(lang(?o), "en") || langMatches(lang(?o), "nl") ))
-      BIND(strlen(REPLACE(?o, " ", "") ) as ?len)
-      FILTER(?len <= 0)
-
-      BIND(
-      IF(LANG(?o),
-          STRLANG("-", LANG(?o)),
-          ?o)
-        AS ?updatedEmptyString
-      )
-    }
-  `;
-
-  // Cumbersome workaround for https://github.com/openlink/virtuoso-opensource/issues/1055
-  const triplesToDeleteQuery = `
-   ${prefixes}
-   SELECT DISTINCT ?g ?s ?p ?o
-   ${whereBlock}
-  `;
-
-  const quadsToDelete = (await query(triplesToDeleteQuery)).results.bindings || [];
-
-  const triplesToInsertQuery = `
-   ${prefixes}
-   SELECT DISTINCT ?g ?s ?p (?updatedEmptyString as ?o)
-   ${whereBlock}
-  `;
-
-  const quadsToInsert = (await query(triplesToInsertQuery)).results.bindings || [];
-
-  for(const quad of quadsToDelete) {
-    await update(
-      `
-      DELETE DATA {
-        GRAPH ${sparqlEscapeUri(quad.g.value)} {
-          ${bindingsToNT([ quad ])[0]}
-        }
-      }
-      `
-    );
-  }
-
-  for(const quad of quadsToInsert) {
-    await update(
-      `
-      INSERT DATA {
-        GRAPH ${sparqlEscapeUri(quad.g.value)} {
-          ${bindingsToNT([ quad ])[0]}
-        }
-      }
-      `
-    );
-  }
 }

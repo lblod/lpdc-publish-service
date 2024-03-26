@@ -1,6 +1,5 @@
 export const prefixes = `
   PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-  PREFIX ns1: <http://data.lblod.info/vocabularies/lpdc-ipdc/>
   PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
   PREFIX cpsv: <http://purl.org/vocab/cpsv#>
@@ -9,8 +8,8 @@ export const prefixes = `
   PREFIX m8g: <http://data.europa.eu/m8g/>
   PREFIX lblodLpdc: <http://data.lblod.info/id/public-services/>
   PREFIX lblodIpdcLpdc: <http://lblod.data.gift/vocabularies/lpdc-ipdc/>
+  PREFIX lpdc: <http://data.lblod.info/vocabularies/lpdc/>
   PREFIX dcat: <http://www.w3.org/ns/dcat#>
-  PREFIX lang: <http://publications.europa.eu/resource/authority/language/>
   PREFIX lblodOrg: <http://data.lblod.info/id/concept/organisatie/>
   PREFIX lblodIpdcThema: <http://data.lblod.info/id/concept/ipdc-thema/>
   PREFIX belgif: <http://vocab.belgif.be/ns/publicservice#>
@@ -23,4 +22,7 @@ export const prefixes = `
   PREFIX locn: <http://www.w3.org/ns/locn>
   PREFIX adres: <https://data.vlaanderen.be/ns/adres#>
   PREFIX as:  <https://www.w3.org/ns/activitystreams#>
+  PREFIX sh: <http://www.w3.org/ns/shacl#>
+  PREFIX http: <http://www.w3.org/2011/http#>
+  PREFIX eli: <http://data.europa.eu/eli/ontology#>
 `;

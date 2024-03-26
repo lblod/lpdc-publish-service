@@ -1,42 +1,26 @@
-import { app, errorHandler, sparqlEscapeUri } from 'mu';
-import { CronJob } from 'cron';
+import {app, errorHandler} from 'mu';
+import {CronJob} from 'cron';
 import bodyparser from 'body-parser';
-import fetch  from 'node-fetch';
-import { getPublicServiceDetails, getServicesToPublish, ensureValidService, updateStatusPublicService, STATUS_PUBLISHED_URI } from './queries';
-import { extractHeadersFromEnv } from './utils/extractHeadersFromEnv';
-import { putDataToIpdc } from './utils/putDataToIpdc';
+import fetch from 'node-fetch';
+import {
+  getPublicServiceDetails,
+  getServicesToPublish,
+  updateStatusPublicService,
+  STATUS_PUBLISHED_URI
+} from './queries';
+import {extractHeadersFromEnv} from './utils/extractHeadersFromEnv';
+import {putDataToIpdc} from './utils/putDataToIpdc';
 import {
   CRON_PATTERN,
   LDES_ENDPOINT,
   LDES_FOLDER,
-  LDES_ENDPOINT_HEADER_PREFIX,
-  LOG_INCOMING_DELTA
+  LDES_ENDPOINT_HEADER_PREFIX
 } from './env-config';
-import { processDelta } from './deltaPostProcess';
+import {clearPublicationErrors} from "./utils/publication-error";
 
 const POST_TO_LDES_ENABLED = process.env.POST_TO_LDES_ENABLED == 'true' || false;
 
 app.use(bodyparser.json());
-
-/*
-*  route for getting deltas
-*/
-app.post("/delta", async function (req, res) {
-  try{
-    const body = req.body;
-    if (LOG_INCOMING_DELTA){
-      console.log(`Receiving delta : ${JSON.stringify(body)}`);
-    }
-
-    await processDelta(body);
-
-    res.status(202).send();
-  } catch(error){
-    console.log(error);
-    res.status(500).send();
-  }
-});
-
 
 /*
  * send data to ldes feed
@@ -56,7 +40,7 @@ async function postDataToLDES(uri, body) {
       body: body,
     });
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(response);
     }
 
@@ -66,38 +50,43 @@ async function postDataToLDES(uri, body) {
   }
 }
 
-new CronJob( CRON_PATTERN, async () => {
-  try{
+let inProgress = false;
+
+new CronJob(CRON_PATTERN, async () => {
+  if (inProgress) {
+    console.log('Process already in progress');
+    return;
+  }
+  try {
+    inProgress = true;
     const unpublishedServices = await getServicesToPublish();
 
     console.log(`Found ${unpublishedServices.length} to publish`);
-
-    for(const service of unpublishedServices) {
+    await clearPublicationErrors();
+    for (const service of unpublishedServices) {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
-        await ensureValidService(service.publicservice.value);
-
-        if(POST_TO_LDES_ENABLED) {
-          for(const subject of Object.keys(subjectsAndData)) {
+        if (POST_TO_LDES_ENABLED) {
+          for (const subject of Object.keys(subjectsAndData)) {
             await postDataToLDES(subject, subjectsAndData[subject].body);
           }
-        }
-        else {
+        } else {
           console.log(`POST TO LDES disabled, skipping`);
         }
-        await putDataToIpdc(subjectsAndData);
+        await putDataToIpdc(service.graph.value, service.publicservice.value, subjectsAndData);
         await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
 
         console.log(`Successfully published ${service.publicservice.value}`);
-      }
-      catch(e) {
-        console.error(e);
+      } catch (e) {
+        console.error(`Could not publish ${service.publicservice.value}`, e);
       }
     }
-  } catch(e){
+  } catch (e) {
     console.error('General error fetching data, retrying later');
     console.log(e);
+  } finally {
+    inProgress = false;
   }
 }, null, true);
 

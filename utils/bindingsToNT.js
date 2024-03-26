@@ -1,4 +1,4 @@
-import { sparqlEscapeString, sparqlEscapeUri } from 'mu';
+import {sparqlEscapeString, sparqlEscapeUri} from 'mu';
 
 export function bindingsToNT(bindings) {
   return bindings.map(b => _bindingToNT(b['s'], b['p'], b['o']));
@@ -11,12 +11,12 @@ function _bindingToNT(s, p, o) {
   if (o.type === 'uri') {
     obj = sparqlEscapeUri(o.value);
   } else {
-    obj = `${sparqlEscapeString(o.value)}`;
+    obj = `${sparqlEscapeString(o.value.toString())}`;
     if (o.datatype)
       obj += `^^${sparqlEscapeUri(o.datatype)}`;
-    else if(o.lang)
+    else if (o.lang)
       obj += `@${o.lang}`;
-    else if(o['xml:lang'])
+    else if (o['xml:lang'])
       obj += `@${o['xml:lang']}`;
   }
   return `${subject} ${predicate} ${obj} .`;
