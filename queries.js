@@ -3,8 +3,6 @@ import {sparqlEscapeUri, sparqlEscapeDateTime} from 'mu';
 import {querySudo as query, updateSudo as update} from "@lblod/mu-auth-sudo";
 import {bindingsToNT} from "./utils/bindingsToNT";
 
-//TODO:
-// - add label STATUS_PUBLISHED_URI, with migration
 export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
 export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
 const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
