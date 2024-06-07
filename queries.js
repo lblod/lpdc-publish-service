@@ -5,7 +5,7 @@ import {bindingsToNT} from "./utils/bindingsToNT";
 
 export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
 export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
-const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
+const VERSTUURD_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 
 /*
  * Poll data from any graphs
@@ -13,11 +13,12 @@ const SENT_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
 export async function getServicesToPublish() {
   const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice ?graph WHERE {
+    SELECT DISTINCT ?publicservice ?graph ?dateModified WHERE {
      {
        GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
-           adms:status ${sparqlEscapeUri(SENT_URI)}.
+           adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+           schema:dateModified ?dateModified.
        }
        FILTER NOT EXISTS{
         ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
@@ -26,15 +27,17 @@ export async function getServicesToPublish() {
      UNION {
         GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
-           adms:status ${sparqlEscapeUri(SENT_URI)};
-           schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+           adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+           schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)};
+           schema:dateModified ?dateModified.
        }
      }
      UNION {
        GRAPH ?graph {
          ?publicservice a as:Tombstone;
-         as:formerType lpdcExt:InstancePublicService;
-         schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)}.
+             as:formerType lpdcExt:InstancePublicService;
+             schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)};
+             as:deleted ?dateModified.
        }
      }
    }
@@ -46,8 +49,8 @@ export async function getServicesToPublish() {
 /*
  * update the status of posted data.
  */
-export async function updateStatusPublicService(uri, status) {
-  const statusUpdate = `
+export async function updateStatusPublicService(uri, dateModified) {
+  const statusUpdateTombstone = `
   ${prefixes}
 
   DELETE {
@@ -58,22 +61,50 @@ export async function updateStatusPublicService(uri, status) {
   }
   INSERT {
     GRAPH ?g {
-      ?subject schema:publication ${sparqlEscapeUri(status)}.
+      ?subject schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
       ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
     }
   }
   WHERE {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?subject a ?foo.
+     ?subject a as:Tombstone;
+          as:deleted ${sparqlEscapeDateTime(dateModified)}.
      OPTIONAL { ?subject schema:publication ?publicationStatus. }.
      OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
-  await update(statusUpdate);
-};
+  await update(statusUpdateTombstone);
 
+  const statusUpdatePublicInstance = `
+  ${prefixes}
+
+  DELETE {
+    GRAPH ?g {
+     ?subject schema:publication ?publicationStatus.
+     ?subject schema:datePublished ?datePublished.
+    }
+  }
+  INSERT {
+    GRAPH ?g {
+      ?subject schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+      ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
+    }
+  }
+  WHERE {
+    BIND(${sparqlEscapeUri(uri)} as ?subject)
+    GRAPH ?g {
+     ?subject a lpdcExt:InstancePublicService;
+              adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+              schema:dateModified ${sparqlEscapeDateTime(dateModified)}.
+     OPTIONAL { ?subject schema:publication ?publicationStatus. }.
+     OPTIONAL { ?subject schema:datePublished ?datePublished. }.
+    }
+  }
+  `;
+  await update(statusUpdatePublicInstance);
+}
 
 export async function getPublicServiceDetails(publicServiceUri) {
   //we make a intermediate data structure to ease posting to ldes endpoint

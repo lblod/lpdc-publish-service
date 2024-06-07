@@ -75,7 +75,7 @@ new CronJob(CRON_PATTERN, async () => {
           console.log(`POST TO LDES disabled, skipping`);
         }
         await putDataToIpdc(service.graph.value, service.publicservice.value, subjectsAndData);
-        await updateStatusPublicService(service.publicservice.value, STATUS_PUBLISHED_URI);
+        await updateStatusPublicService(service.publicservice.value, service.dateModified.value);
 
         console.log(`Successfully published ${service.publicservice.value}`);
       } catch (e) {
