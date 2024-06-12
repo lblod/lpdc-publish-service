@@ -5,7 +5,7 @@ import {bindingsToNT} from "./utils/bindingsToNT";
 
 export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
 export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
-const VERSTUURD_URI = "http://lblod.data.gift/concepts/instance-status/verstuurd";
+const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
 
 /*
  * Poll data from any graphs
@@ -17,7 +17,7 @@ export async function getServicesToPublish() {
      {
        GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
-           adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+           adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
            schema:dateModified ?dateModified.
        }
        FILTER NOT EXISTS{
@@ -27,7 +27,7 @@ export async function getServicesToPublish() {
      UNION {
         GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
-           adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+           adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
            schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)};
            schema:dateModified ?dateModified.
        }
@@ -96,7 +96,7 @@ export async function updateStatusPublicService(uri, dateModified) {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
      ?subject a lpdcExt:InstancePublicService;
-              adms:status ${sparqlEscapeUri(VERSTUURD_URI)};
+              adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
               schema:dateModified ${sparqlEscapeDateTime(dateModified)}.
      OPTIONAL { ?subject schema:publication ?publicationStatus. }.
      OPTIONAL { ?subject schema:datePublished ?datePublished. }.
