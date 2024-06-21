@@ -5,8 +5,7 @@ import fetch from 'node-fetch';
 import {
   getPublicServiceDetails,
   getServicesToPublish,
-  updateStatusPublicService,
-  STATUS_PUBLISHED_URI
+  updateDatePublishedPublicService,
 } from './queries';
 import {extractHeadersFromEnv} from './utils/extractHeadersFromEnv';
 import {putDataToIpdc} from './utils/putDataToIpdc';
@@ -75,7 +74,7 @@ new CronJob(CRON_PATTERN, async () => {
           console.log(`POST TO LDES disabled, skipping`);
         }
         await putDataToIpdc(service.graph.value, service.publicservice.value, subjectsAndData);
-        await updateStatusPublicService(service.publicservice.value, service.dateModified.value);
+        await updateDatePublishedPublicService(service.publicservice.value);
 
         console.log(`Successfully published ${service.publicservice.value}`);
       } catch (e) {

@@ -1,10 +1,8 @@
-import {prefixes} from "./prefixes";
-import {sparqlEscapeUri, sparqlEscapeDateTime} from 'mu';
-import {querySudo as query, updateSudo as update} from "@lblod/mu-auth-sudo";
-import {bindingsToNT} from "./utils/bindingsToNT";
+import { prefixes } from "./prefixes";
+import { sparqlEscapeUri, sparqlEscapeDateTime } from 'mu';
+import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
+import { bindingsToNT } from "./utils/bindingsToNT";
 
-export const STATUS_PUBLISHED_URI = "http://lblod.data.gift/concepts/publication-status/gepubliceerd";
-export const STATUS_TO_REPUBLISH_URI = "http://lblod.data.gift/concepts/publication-status/te-herpubliceren";
 const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
 
 /*
@@ -13,32 +11,42 @@ const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden
 export async function getServicesToPublish() {
   const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice ?graph ?dateModified WHERE {
+    SELECT DISTINCT ?publicservice ?graph WHERE {
      {
        GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
-           adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
-           schema:dateModified ?dateModified.
+           schema:dateSent ?dateSent;
+           adms:status ${sparqlEscapeUri(VERZONDEN_URI)}.
        }
-       FILTER NOT EXISTS{
-        ?publicservice schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
+       FILTER NOT EXISTS {
+         ?publicservice schema:datePublished ?datePublished.
        }
      }
      UNION {
         GRAPH ?graph {
          ?publicservice a lpdcExt:InstancePublicService;
            adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
-           schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)};
-           schema:dateModified ?dateModified.
+           schema:dateSent ?dateSent;
+           schema:datePublished ?datePublished.
+       }
+       FILTER (?dateSent > ?datePublished)
+     }
+     UNION {
+       GRAPH ?graph {
+         ?publicservice a as:Tombstone;
+             as:formerType lpdcExt:InstancePublicService.
+       }
+       FILTER NOT EXISTS {
+          ?publicservice schema:datePublished ?datePublished.
        }
      }
      UNION {
        GRAPH ?graph {
          ?publicservice a as:Tombstone;
              as:formerType lpdcExt:InstancePublicService;
-             schema:publication ${sparqlEscapeUri(STATUS_TO_REPUBLISH_URI)};
-             as:deleted ?dateModified.
+             as:delete ?dateDeleted;
        }
+       FILTER (?dateDeleted > ?datePublished)
      }
    }
   `;
@@ -49,61 +57,52 @@ export async function getServicesToPublish() {
 /*
  * update the status of posted data.
  */
-export async function updateStatusPublicService(uri, dateModified) {
-  const statusUpdateTombstone = `
+export async function updateDatePublishedPublicService(uri) {
+  const updateDatePublishedTombstone = `
   ${prefixes}
 
   DELETE {
     GRAPH ?g {
-     ?subject schema:publication ?publicationStatus.
      ?subject schema:datePublished ?datePublished.
     }
   }
   INSERT {
     GRAPH ?g {
-      ?subject schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
       ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
     }
   }
   WHERE {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?subject a as:Tombstone;
-          as:deleted ${sparqlEscapeDateTime(dateModified)}.
-     OPTIONAL { ?subject schema:publication ?publicationStatus. }.
+     ?subject a as:Tombstone.
      OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
-  await update(statusUpdateTombstone);
+  await update(updateDatePublishedTombstone);
 
-  const statusUpdatePublicInstance = `
+  const updateDatePublishedPublicInstance = `
   ${prefixes}
 
   DELETE {
     GRAPH ?g {
-     ?subject schema:publication ?publicationStatus.
      ?subject schema:datePublished ?datePublished.
     }
   }
   INSERT {
     GRAPH ?g {
-      ?subject schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)}.
       ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
     }
   }
   WHERE {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?subject a lpdcExt:InstancePublicService;
-              adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
-              schema:dateModified ${sparqlEscapeDateTime(dateModified)}.
-     OPTIONAL { ?subject schema:publication ?publicationStatus. }.
+     ?subject a lpdcExt:InstancePublicService.
      OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
-  await update(statusUpdatePublicInstance);
+  await update(updateDatePublishedPublicInstance);
 }
 
 export async function getPublicServiceDetails(publicServiceUri) {
@@ -367,32 +366,6 @@ export async function getPublicServiceDetails(publicServiceUri) {
   const results = createResultObject(resultBindings);
 
   return results;
-}
-
-/*
- * takes a service object and returns if it has been published
- */
-export async function isPublishedService(service) {
-  // Note: the extra check on tombstone,
-  //   is because service can be deleted before delta gets processed
-  const ontwerpUri = "http://lblod.data.gift/concepts/instance-status/ontwerp";
-  const queryString = `
-    ${prefixes}
-    ASK {
-      {
-        ${sparqlEscapeUri(service)}
-          a lpdcExt:InstancePublicService ;
-          adms:status ${sparqlEscapeUri(ontwerpUri)};
-          schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
-      }
-      UNION {
-        ${sparqlEscapeUri(service)} a as:Tombstone;
-            as:formerType lpdcExt:InstancePublicService;
-            schema:publication ${sparqlEscapeUri(STATUS_PUBLISHED_URI)} .
-        }
-    }`;
-  const queryData = await query(queryString);
-  return queryData.boolean;
 }
 
 /*
