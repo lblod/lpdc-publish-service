@@ -45,6 +45,7 @@ export async function getServicesToPublish() {
          ?publicservice a as:Tombstone;
              as:formerType lpdcExt:InstancePublicService;
              as:delete ?dateDeleted;
+             schema:datePublished ?datePublished.
        }
        FILTER (?dateDeleted > ?datePublished)
      }
