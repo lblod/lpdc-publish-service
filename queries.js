@@ -44,7 +44,7 @@ export async function getServicesToPublish() {
        GRAPH ?graph {
          ?publicservice a as:Tombstone;
              as:formerType lpdcExt:InstancePublicService;
-             as:delete ?dateDeleted;
+             as:deleted ?dateDeleted;
              schema:datePublished ?datePublished.
        }
        FILTER (?dateDeleted > ?datePublished)
