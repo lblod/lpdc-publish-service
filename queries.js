@@ -9,6 +9,8 @@ const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden
  * Poll data from any graphs
  */
 export async function getServicesToPublish() {
+  //TODO LPDC-1236 filter on PublishedInstancePublicServiceSnapshot
+  //TODO LPDC-1236 remove filters on datesent > datePulbished
   const queryString = `
     ${prefixes}
     SELECT DISTINCT ?publicservice ?graph ?type WHERE {
@@ -56,6 +58,7 @@ export async function getServicesToPublish() {
    }
   `;
   const result = (await query(queryString)).results.bindings;
+  //TODO LPDC-1236: order on datesent and dateDeleted ... in query (if multiple sents on same occured) ; and take the most recent one (always) ... .
   return result;
 };
 
@@ -63,6 +66,7 @@ export async function getServicesToPublish() {
  * update the status of posted data.
  */
 export async function updateDatePublishedPublicService(uri, type) {
+  //TODO LPDC-1236: remove delete datePublished
   const updateDatePublishedQuery = `
   ${prefixes}
 
@@ -87,10 +91,14 @@ export async function updateDatePublishedPublicService(uri, type) {
   await update(updateDatePublishedQuery);
 }
 
+//TODO LPDC-1236: publicServiceUri is not correct param, it should be either PublishedInstancePublicServiceSnapshot id, or tombstone id
 export async function getPublicServiceDetails(publicServiceUri) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const resultBindings = [];
 
+  //TODO LPDC-1236: query on PublishedInstancePublicServiceSnapshot
+
+  //TODO LPDC-1236: query on tombstone query: also include version of ... so that we can have multiple tombstones of same public service.
   const publicServiceQuery = `
     ${prefixes}
 
@@ -353,7 +361,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
 /*
  * Takes a list of bindings and returns a list of objects ready to be sent
  * Group the results by subject.
- * The triples to be published are bundled per suject, so everything gets properly versioned
+ * The triples to be published are bundled per subject, so everything gets properly versioned
  */
 function createResultObject(bindingsList) {
   const resultObject = {};

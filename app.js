@@ -58,14 +58,19 @@ new CronJob(CRON_PATTERN, async () => {
   }
   try {
     inProgress = true;
-    const unpublishedServices = await getServicesToPublish();
+    const servicesToPublish = await getServicesToPublish();
 
-    console.log(`Found ${unpublishedServices.length} to publish`);
+    console.log(`Found ${servicesToPublish.length} to publish`);
     await clearPublicationErrors();
-    for (const service of unpublishedServices) {
+    for (const service of servicesToPublish) {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publicservice.value);
 
+        //TODO LPDC-1236: update ids in memory: the first level ids should be replaced by the one that is in version of
+        //TODO LPDC-1236: remove version of triple
+        //TODO LPDC-1236: update type : PublishedInstancePublicServiceSnapshot => InstancePublicService ; Tombstone stays
+
+        //TODO LPDC-1236: remove dead code: POST_TO_LDES_ENABLED code ...
         if (POST_TO_LDES_ENABLED) {
           for (const subject of Object.keys(subjectsAndData)) {
             await postDataToLDES(subject, subjectsAndData[subject].body);
