@@ -11,12 +11,13 @@ const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden
 export async function getServicesToPublish() {
   const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice ?graph WHERE {
+    SELECT DISTINCT ?publicservice ?graph ?type WHERE {
      {
        GRAPH ?graph {
-         ?publicservice a lpdcExt:InstancePublicService;
+         ?publicservice a ?type;
            schema:dateSent ?dateSent;
            adms:status ${sparqlEscapeUri(VERZONDEN_URI)}.
+         FILTER(?type = lpdcExt:InstancePublicService)
        }
        FILTER NOT EXISTS {
          ?publicservice schema:datePublished ?datePublished.
@@ -24,17 +25,19 @@ export async function getServicesToPublish() {
      }
      UNION {
         GRAPH ?graph {
-         ?publicservice a lpdcExt:InstancePublicService;
+         ?publicservice a ?type;
            adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
            schema:dateSent ?dateSent;
            schema:datePublished ?datePublished.
+         FILTER(?type = lpdcExt:InstancePublicService)
        }
        FILTER (?dateSent > ?datePublished)
      }
      UNION {
        GRAPH ?graph {
-         ?publicservice a as:Tombstone;
+         ?publicservice a ?type;
              as:formerType lpdcExt:InstancePublicService.
+         FILTER (?type = as:Tombstone)
        }
        FILTER NOT EXISTS {
           ?publicservice schema:datePublished ?datePublished.
@@ -42,10 +45,11 @@ export async function getServicesToPublish() {
      }
      UNION {
        GRAPH ?graph {
-         ?publicservice a as:Tombstone;
+         ?publicservice a ?type;
              as:formerType lpdcExt:InstancePublicService;
              as:deleted ?dateDeleted;
              schema:datePublished ?datePublished.
+          FILTER (?type = as:Tombstone)
        }
        FILTER (?dateDeleted > ?datePublished)
      }
@@ -58,8 +62,8 @@ export async function getServicesToPublish() {
 /*
  * update the status of posted data.
  */
-export async function updateDatePublishedPublicService(uri) {
-  const updateDatePublishedTombstone = `
+export async function updateDatePublishedPublicService(uri, type) {
+  const updateDatePublishedQuery = `
   ${prefixes}
 
   DELETE {
@@ -75,35 +79,12 @@ export async function updateDatePublishedPublicService(uri) {
   WHERE {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
-     ?subject a as:Tombstone.
+     ?subject a ${sparqlEscapeUri(type)}.
      OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
-  await update(updateDatePublishedTombstone);
-
-  const updateDatePublishedPublicInstance = `
-  ${prefixes}
-
-  DELETE {
-    GRAPH ?g {
-     ?subject schema:datePublished ?datePublished.
-    }
-  }
-  INSERT {
-    GRAPH ?g {
-      ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
-    }
-  }
-  WHERE {
-    BIND(${sparqlEscapeUri(uri)} as ?subject)
-    GRAPH ?g {
-     ?subject a lpdcExt:InstancePublicService.
-     OPTIONAL { ?subject schema:datePublished ?datePublished. }.
-    }
-  }
-  `;
-  await update(updateDatePublishedPublicInstance);
+  await update(updateDatePublishedQuery);
 }
 
 export async function getPublicServiceDetails(publicServiceUri) {
