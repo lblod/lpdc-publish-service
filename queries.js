@@ -9,56 +9,37 @@ const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden
  * Poll data from any graphs
  */
 export async function getServicesToPublish() {
-  //TODO LPDC-1236 filter on PublishedInstancePublicServiceSnapshot
-  //TODO LPDC-1236 remove filters on datesent > datePulbished
   const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice ?graph ?type WHERE {
-     {
-       GRAPH ?graph {
-         ?publicservice a ?type;
-           schema:dateSent ?dateSent;
-           adms:status ${sparqlEscapeUri(VERZONDEN_URI)}.
-         FILTER(?type = lpdcExt:InstancePublicService)
-       }
+    SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph
+    WHERE {
+      {
+        SELECT ?publicservice (MAX(?generatedAt) AS ?maxGeneratedAt) ?graph
+        WHERE {
+          VALUES ?types {
+                lpdcExt:PublishedInstancePublicServiceSnapshot
+                 as:Tombstone
+            }
+          GRAPH ?graph {
+            ?publishedPublicService a ?types;
+                                    dct:isVersionOf ?publicservice;
+                                    prov:generatedAtTime ?generatedAt.
+          }
+        }
+        GROUP BY ?publicservice ?graph
+      }
+      GRAPH ?graph {
+        ?publishedPublicService a ?type;
+                                prov:generatedAtTime ?generatedAt.
+        FILTER(?generatedAt = ?maxGeneratedAt)
+      }
        FILTER NOT EXISTS {
-         ?publicservice schema:datePublished ?datePublished.
+             ?publishedPublicService schema:datePublished ?datePublished.
        }
-     }
-     UNION {
-        GRAPH ?graph {
-         ?publicservice a ?type;
-           adms:status ${sparqlEscapeUri(VERZONDEN_URI)};
-           schema:dateSent ?dateSent;
-           schema:datePublished ?datePublished.
-         FILTER(?type = lpdcExt:InstancePublicService)
-       }
-       FILTER (?dateSent > ?datePublished)
-     }
-     UNION {
-       GRAPH ?graph {
-         ?publicservice a ?type;
-             as:formerType lpdcExt:InstancePublicService.
-         FILTER (?type = as:Tombstone)
-       }
-       FILTER NOT EXISTS {
-          ?publicservice schema:datePublished ?datePublished.
-       }
-     }
-     UNION {
-       GRAPH ?graph {
-         ?publicservice a ?type;
-             as:formerType lpdcExt:InstancePublicService;
-             as:deleted ?dateDeleted;
-             schema:datePublished ?datePublished.
-          FILTER (?type = as:Tombstone)
-       }
-       FILTER (?dateDeleted > ?datePublished)
-     }
-   }
+    }
   `;
+
   const result = (await query(queryString)).results.bindings;
-  //TODO LPDC-1236: order on datesent and dateDeleted ... in query (if multiple sents on same occured) ; and take the most recent one (always) ... .
   return result;
 };
 
@@ -105,7 +86,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
     SELECT DISTINCT ?s ?p ?o {
       BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
       GRAPH ?g {
-        ?s a lpdcExt:InstancePublicService;
+        ?s a lpdcExt:PublishedInstancePublicServiceSnapshot;
           ?p ?o.
       }
     }
@@ -122,7 +103,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           schema:url ?location;
           sh:order ?order.
     } WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
             m8g:hasLegalResource ?legalResourceId.
         ?legalResourceId a eli:LegalResource;
           schema:url ?location;
@@ -143,7 +124,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           dct:title ?name.
     }
     WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
           m8g:hasSupportingEvidence ?s.
@@ -165,7 +146,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           dct:description ?description;
@@ -187,7 +168,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
 
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
@@ -213,7 +194,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           dct:description ?description;
@@ -234,7 +215,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           dct:description ?description;
@@ -253,7 +234,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:produces ?s.
 
        ?s a lpdcExt:FinancialAdvantage;
@@ -285,7 +266,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           m8g:hasContactPoint ?s.
         ?s a schema:ContactPoint;
            sh:order ?order.
@@ -319,7 +300,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:InstancePublicService;
+        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           rdfs:seeAlso ?s.
         ?s a schema:WebSite;
           schema:url ?location;
@@ -342,6 +323,8 @@ export async function getPublicServiceDetails(publicServiceUri) {
        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
        <https://www.w3.org/ns/activitystreams#formerType>
        <https://www.w3.org/ns/activitystreams#deleted>
+       <http://purl.org/dc/terms/isVersionOf>
+       <http://www.w3.org/ns/prov#generatedAtTime>
       }
       GRAPH ?g {
         ?s a as:Tombstone;

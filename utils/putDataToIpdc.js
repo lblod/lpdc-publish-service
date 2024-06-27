@@ -1,10 +1,10 @@
 import * as jsonld from 'jsonld';
-import N3 from 'n3';
+import N3, { NamedNode, Quad } from 'n3';
 import fetch from 'node-fetch';
 import {IPDC_JSON_ENDPOINT, IPDC_X_API_KEY} from '../env-config';
 import {createPublicationError} from "./publication-error";
 
-export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
+export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData) {
   let ttl = '';
   for (const subject of Object.keys(subjectsAndData)) {
     const body = subjectsAndData[subject].body;
@@ -13,7 +13,26 @@ export async function putDataToIpdc(graph, instanceIri, subjectsAndData) {
 
   const parser = new N3.Parser({format: 'text/turtle'});
 
-  const quads = parser.parse(ttl);
+  let quads = parser.parse(ttl);
+
+  const instanceObject = quads
+    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'http://purl.org/dc/terms/isVersionOf')
+    ?.object;
+
+  const instanceIri = instanceObject?.value;
+
+  if(instanceObject === undefined || instanceIri === undefined) {
+    throw new Error(`Could not find isVersionOf for <${publishedInstanceIri}> in <${graph}>`);
+  }
+
+  quads = quads
+    .map(q => {
+      if(q.subject.value === publishedInstanceIri) {
+        return new Quad(instanceObject, q.predicate, q.object);
+      } else {
+        return q;
+      }
+    });
 
   // e.g http://mu.semte.ch/graphs/organizations/73840d393bd94828f0903e8357c7f328d4bf4b8fbd63adbfa443e784f056a589/LoketLB-LPDCGebruiker
   const bestuurseenheidId = graph.split("/")[5];
