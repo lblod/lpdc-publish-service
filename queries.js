@@ -22,7 +22,7 @@ export async function getServicesToPublish() {
             }
           GRAPH ?graph {
             ?publishedPublicService a ?types;
-                                    dct:isVersionOf ?publicservice;
+                                    lpdcExt:isPublishedVersionOf ?publicservice;
                                     prov:generatedAtTime ?generatedAt.
           }
         }
@@ -323,7 +323,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
        <https://www.w3.org/ns/activitystreams#formerType>
        <https://www.w3.org/ns/activitystreams#deleted>
-       <http://purl.org/dc/terms/isVersionOf>
+       <https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf>
        <http://www.w3.org/ns/prov#generatedAtTime>
       }
       GRAPH ?g {

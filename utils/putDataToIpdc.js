@@ -16,13 +16,13 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
   let quads = parser.parse(ttl);
 
   const instanceObject = quads
-    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'http://purl.org/dc/terms/isVersionOf')
+    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf')
     ?.object;
 
   const instanceIri = instanceObject?.value;
 
   if(instanceObject === undefined || instanceIri === undefined) {
-    throw new Error(`Could not find isVersionOf for <${publishedInstanceIri}> in <${graph}>`);
+    throw new Error(`Could not find isPublishedVersionOf for <${publishedInstanceIri}> in <${graph}>`);
   }
 
   quads = quads
