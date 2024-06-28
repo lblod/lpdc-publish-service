@@ -1,8 +1,8 @@
 import * as jsonld from 'jsonld';
 import N3, { NamedNode, Quad } from 'n3';
 import fetch from 'node-fetch';
-import {IPDC_JSON_ENDPOINT, IPDC_X_API_KEY} from '../env-config';
-import {createPublicationError} from "./publication-error";
+import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
+import { createPublicationError } from "./publication-error";
 
 export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData) {
   let ttl = '';
@@ -21,14 +21,25 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
 
   const instanceIri = instanceObject?.value;
 
-  if(instanceObject === undefined || instanceIri === undefined) {
+  if (instanceObject === undefined || instanceIri === undefined) {
     throw new Error(`Could not find isPublishedVersionOf for <${publishedInstanceIri}> in <${graph}>`);
   }
 
   quads = quads
     .map(q => {
-      if(q.subject.value === publishedInstanceIri) {
+      if (q.subject.value === publishedInstanceIri) {
         return new Quad(instanceObject, q.predicate, q.object);
+      } else {
+        return q;
+      }
+    });
+
+  quads = quads
+    .map(q => {
+      if (q.subject.value === instanceIri
+        && q.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+        && q.object.value === 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#PublishedInstancePublicServiceSnapshot') {
+        return new Quad(q.subject, q.predicate, new NamedNode('https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#InstancePublicService'));
       } else {
         return q;
       }
