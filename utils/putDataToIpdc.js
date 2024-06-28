@@ -47,6 +47,7 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
     .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/dateSent')
     ?.object?.value;
 
+  //TODO LPDC-1236: datePublished -> is this already set?
   const datePublished = quads
     .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/datePublished')
     ?.object?.value;
