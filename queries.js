@@ -72,19 +72,14 @@ export async function updateDatePublishedPublicService(uri, type) {
   await update(updateDatePublishedQuery);
 }
 
-//TODO LPDC-1236: publicServiceUri is not correct param, it should be either PublishedInstancePublicServiceSnapshot id, or tombstone id
-export async function getPublicServiceDetails(publicServiceUri) {
+export async function getPublicServiceDetails(publishedInstanceSnaphotId) {
   //we make a intermediate data structure to ease posting to ldes endpoint
   const resultBindings = [];
-
-  //TODO LPDC-1236: query on PublishedInstancePublicServiceSnapshot
-
-  //TODO LPDC-1236: query on tombstone query: also include version of ... so that we can have multiple tombstones of same public service.
   const publicServiceQuery = `
     ${prefixes}
 
     SELECT DISTINCT ?s ?p ?o {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+      BIND(${sparqlEscapeUri(publishedInstanceSnaphotId)} as ?s)
       GRAPH ?g {
         ?s a lpdcExt:PublishedInstancePublicServiceSnapshot;
           ?p ?o.
@@ -103,7 +98,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           schema:url ?location;
           sh:order ?order.
     } WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
             m8g:hasLegalResource ?legalResourceId.
         ?legalResourceId a eli:LegalResource;
           schema:url ?location;
@@ -124,7 +119,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           dct:title ?name.
     }
     WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           belgif:hasRequirement ?requirement.
         ?requirement a m8g:Requirement;
           m8g:hasSupportingEvidence ?s.
@@ -146,7 +141,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           belgif:hasRequirement ?s.
         ?s a m8g:Requirement;
           dct:description ?description;
@@ -168,7 +163,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
 
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:follows ?rule.
         ?rule a cpsv:Rule;
           lpdcExt:hasWebsite ?s.
@@ -194,7 +189,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:follows ?s.
         ?s a cpsv:Rule;
           dct:description ?description;
@@ -215,7 +210,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           m8g:hasCost ?s.
          ?s a m8g:Cost;
           dct:description ?description;
@@ -234,7 +229,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           cpsv:produces ?s.
 
        ?s a lpdcExt:FinancialAdvantage;
@@ -266,7 +261,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           locn:adminUnitL2 ?administrativeUnitLevel2.
        }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           m8g:hasContactPoint ?s.
         ?s a schema:ContactPoint;
            sh:order ?order.
@@ -300,7 +295,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
           sh:order ?order.
       }
       WHERE {
-        ${sparqlEscapeUri(publicServiceUri)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
+        ${sparqlEscapeUri(publishedInstanceSnaphotId)} a lpdcExt:PublishedInstancePublicServiceSnapshot;
           rdfs:seeAlso ?s.
         ?s a schema:WebSite;
           schema:url ?location;
@@ -317,7 +312,7 @@ export async function getPublicServiceDetails(publicServiceUri) {
       ?s ?p ?o.
     }
     WHERE {
-      BIND(${sparqlEscapeUri(publicServiceUri)} as ?s)
+      BIND(${sparqlEscapeUri(publishedInstanceSnaphotId)} as ?s)
 
       VALUES ?p {
        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>

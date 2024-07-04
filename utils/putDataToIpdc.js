@@ -1,8 +1,8 @@
 import * as jsonld from 'jsonld';
-import N3, { NamedNode, Quad } from 'n3';
+import N3, {NamedNode, Quad} from 'n3';
 import fetch from 'node-fetch';
-import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from '../env-config';
-import { createPublicationError } from "./publication-error";
+import {IPDC_JSON_ENDPOINT, IPDC_X_API_KEY} from '../env-config';
+import {createPublicationError} from "./publication-error";
 
 export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData) {
   let ttl = '';
@@ -19,6 +19,10 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
     .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf')
     ?.object;
 
+  const generatedAtTime = quads
+    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'http://www.w3.org/ns/prov#generatedAtTime')
+    ?.object?.value;
+
   const instanceIri = instanceObject?.value;
 
   if (instanceObject === undefined || instanceIri === undefined) {
@@ -32,9 +36,9 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
       } else {
         return q;
       }
-    });
-
-  quads = quads
+    })
+    .filter(q => q.predicate.value !== 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf')
+    .filter(q => q.predicate.value !== 'http://www.w3.org/ns/prov#generatedAtTime')
     .map(q => {
       if (q.subject.value === instanceIri
         && q.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
@@ -54,19 +58,9 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
     .filter(q => q.object.language.startsWith('nl'));
   const title = titleQuad[0]?.object?.value;
 
-  const dateSent = quads
-    .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/dateSent')
-    ?.object?.value;
-
-  //TODO LPDC-1236: datePublished -> is this already set? , review?
-  const datePublished = quads
-    .find(q => q.subject.value === instanceIri && q.predicate.value === 'http://schema.org/datePublished')
-    ?.object?.value;
-
-  const dateDeleted = quads
-    .find(q => q.subject.value === instanceIri && q.predicate.value === 'https://www.w3.org/ns/activitystreams#deleted')
-    ?.object?.value;
-
+  const type = quads.find(
+    q => q.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+  )?.object?.value;
 
   const fromRdf = await jsonld.fromRDF(quads);
   const doc = await jsonld.expand(fromRdf);
@@ -85,7 +79,7 @@ export async function putDataToIpdc(graph, publishedInstanceIri, subjectsAndData
   if (!response.ok) {
     const responseBody = await getResponseBody(response);
     try {
-      await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri, dateSent ?? dateDeleted, datePublished);
+      await createPublicationError(response.status, JSON.stringify(responseBody), instanceIri, title, bestuurseenheidIri, generatedAtTime, type);
     } catch (e) {
       console.log('Could not save publicationError', e);
     }

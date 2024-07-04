@@ -31,10 +31,6 @@ new CronJob(CRON_PATTERN, async () => {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publishedPublicService.value);
 
-        //TODO LPDC-1236: update ids in memory: the first level ids should be replaced by the one that is in version of
-        //TODO LPDC-1236: remove version of triple
-        //TODO LPDC-1236: update type : PublishedInstancePublicServiceSnapshot => InstancePublicService ; Tombstone stays
-
         await putDataToIpdc(service.graph.value, service.publishedPublicService.value, subjectsAndData);
         await updateDatePublishedPublicService(service.publishedPublicService.value, service.type.value);
 
