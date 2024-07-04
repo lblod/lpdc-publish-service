@@ -47,15 +47,8 @@ export async function getServicesToPublish() {
  * update the status of posted data.
  */
 export async function updateDatePublishedPublicService(uri, type) {
-  //TODO LPDC-1236: remove delete datePublished
   const updateDatePublishedQuery = `
   ${prefixes}
-
-  DELETE {
-    GRAPH ?g {
-     ?subject schema:datePublished ?datePublished.
-    }
-  }
   INSERT {
     GRAPH ?g {
       ?subject schema:datePublished ${sparqlEscapeDateTime(new Date())}.
@@ -65,7 +58,6 @@ export async function updateDatePublishedPublicService(uri, type) {
     BIND(${sparqlEscapeUri(uri)} as ?subject)
     GRAPH ?g {
      ?subject a ${sparqlEscapeUri(type)}.
-     OPTIONAL { ?subject schema:datePublished ?datePublished. }.
     }
   }
   `;
