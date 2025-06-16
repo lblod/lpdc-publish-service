@@ -3,7 +3,7 @@ import {sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeString, sparqlEscapeI
 import uuid from "uuid";
 import {updateSudo} from "@lblod/mu-auth-sudo";
 
-export async function createPublicationError(errorCode, errorMessage, instanceIri, title, bestuurseenheidIri, dateSent, datePublished) {
+export async function createPublicationError(errorCode, errorMessage, instanceIri, title, bestuurseenheidIri, dateSent, type) {
   const publicationErrorIri = `http://data.lblod.info/id/instance-publication-error/${uuid()}`;
 
   const triples = [
@@ -15,7 +15,7 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
     bestuurseenheidIri ? `${sparqlEscapeUri(publicationErrorIri)} foaf:owner ${sparqlEscapeUri(bestuurseenheidIri)} .` : undefined,
     `${sparqlEscapeUri(publicationErrorIri)} schema:dateCreated ${sparqlEscapeDateTime(new Date())} .`,
     dateSent ? `${sparqlEscapeUri(publicationErrorIri)} schema:dateSent ${sparqlEscapeDateTime(dateSent)} .` : undefined,
-    datePublished ? `${sparqlEscapeUri(publicationErrorIri)} schema:datePublished ${sparqlEscapeDateTime(datePublished)} .` : undefined,
+    type ? `${sparqlEscapeUri(publicationErrorIri)} as:formerType ${sparqlEscapeUri(type)} .` : undefined,
   ].filter(it => !!it);
 
   const insertPublicationError = `
