@@ -17,4 +17,4 @@ steps:
         from_secret: woodpecker_token
 when:
   - event: push
-    branch: [development]
+    branch: [master]
