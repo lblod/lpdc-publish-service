@@ -16,8 +16,6 @@ It requests document regularly using `cron`.
 | `CRON_PATTERN`       | How often to check for publishable product instances                | Every minute |
 | `IPDC_JSON_ENDPOINT` | The IPDC endpoint to publish product instances to                   | None         |
 | `IPDC_X_API_KEY`     | The API key add in calls to the IPDC endpoint                       | None         |
-| `LDES_ENDPOINT`      | url of the fragmenter on which the service will publish             | None         |
-| `LDES_FOLDER`        | *(optional)* folder of the fragmenter, the service will publish in. | ""           |
 
 ## Docker-compose configuration
 
