@@ -1,7 +1,8 @@
 import { prefixes } from "./prefixes";
-import { sparqlEscapeUri, sparqlEscapeDateTime } from 'mu';
+import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from 'mu';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
+import { RETRY_COUNTER_LIMIT } from './constants.js';
 
 const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
 
@@ -11,7 +12,7 @@ const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden
 export async function getServicesToPublish() {
   const queryString = `
     ${prefixes}
-    SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph
+    SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph ?publishRetryCount
     WHERE {
       {
         SELECT ?publicservice (MAX(?generatedAt) AS ?maxGeneratedAt) ?graph
@@ -30,12 +31,16 @@ export async function getServicesToPublish() {
       }
       GRAPH ?graph {
         ?publishedPublicService a ?type;
-                                prov:generatedAtTime ?generatedAt.
-        FILTER(?generatedAt = ?maxGeneratedAt)
+                                prov:generatedAtTime ?maxGeneratedAt.
+
+        OPTIONAL {
+          ?publishedPublicService ext:publishRetryCount ?publishRetryCount .
+        }
       }
-       FILTER NOT EXISTS {
-             ?publishedPublicService schema:datePublished ?datePublished.
-       }
+      FILTER NOT EXISTS {
+            ?publishedPublicService schema:datePublished ?datePublished.
+      }
+      FILTER(COALESCE(?publishRetryCount, 0) < ${sparqlEscapeInt(RETRY_COUNTER_LIMIT)})
     }
   `;
 
@@ -344,4 +349,29 @@ function createResultObject(bindingsList) {
     };
   }
   return resultObject;
+}
+
+export async function incrementRetryCounter(publishedServiceUri) {
+  await update(`
+    ${prefixes}
+    DELETE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+      }
+    }
+    INSERT {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?incrementedCounter .
+      }
+    }
+    WHERE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ?p ?o .
+        OPTIONAL {
+          ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+        }
+        BIND (COALESCE(?counter, 0)+1 AS ?incrementedCounter)
+      }
+    }
+  `);
 }

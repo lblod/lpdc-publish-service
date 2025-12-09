@@ -5,12 +5,14 @@ import {
   getPublicServiceDetails,
   getServicesToPublish,
   updateDatePublishedPublicService,
+  incrementRetryCounter
 } from './queries';
 import {putDataToIpdc} from './utils/putDataToIpdc';
 import {
   CRON_PATTERN,
 } from './env-config';
 import {clearPublicationErrors} from "./utils/publication-error";
+import { RETRY_COUNTER_LIMIT } from './constants';
 
 app.use(bodyparser.json());
 
@@ -36,7 +38,16 @@ new CronJob(CRON_PATTERN, async () => {
 
         console.log(`Successfully published ${service.publishedPublicService.value} of ${service.publicservice?.value}`);
       } catch (e) {
-        console.error(`Could not publish ${service.publishedPublicService.value} of ${service.publicservice?.value}`, e);
+        await incrementRetryCounter(service.publishedPublicService.value);
+        const retriesLeft = RETRY_COUNTER_LIMIT - (service.publishRetryCount?.value ?? 0) - 1;
+        console.error(
+          `Could not publish ${service.publishedPublicService.value} of ${
+            service.publicservice?.value
+          }, ${retriesLeft} ${retriesLeft === 1 ? "retry" : "retries"} left${
+            retriesLeft === 0 ? ", giving up" : ""
+          }. Error: `,
+          e
+        );
       }
     }
   } catch (e) {
