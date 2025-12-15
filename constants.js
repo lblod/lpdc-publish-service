@@ -1,1 +1,0 @@
-export const RETRY_COUNTER_LIMIT = 5;

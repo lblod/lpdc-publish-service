@@ -10,9 +10,9 @@ import {
 import {putDataToIpdc} from './utils/putDataToIpdc';
 import {
   CRON_PATTERN,
+  RETRY_COUNTER_LIMIT
 } from './env-config';
 import {clearPublicationErrors} from "./utils/publication-error";
-import { RETRY_COUNTER_LIMIT } from './constants';
 
 app.use(bodyparser.json());
 
