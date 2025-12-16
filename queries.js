@@ -2,7 +2,7 @@ import { prefixes } from "./prefixes";
 import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from 'mu';
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
-import { RETRY_COUNTER_LIMIT } from './constants.js';
+import { RETRY_COUNTER_LIMIT } from './env-config.js';
 
 const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
 
