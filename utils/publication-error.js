@@ -2,6 +2,8 @@ import {prefixes} from "../prefixes";
 import {sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeString, sparqlEscapeInt} from 'mu';
 import uuid from "uuid";
 import {updateSudo} from "@lblod/mu-auth-sudo";
+import { subMonths } from "date-fns";
+import { ERROR_EXPIRATION_MONTHS } from "../env-config";
 
 export async function createPublicationError(errorCode, errorMessage, instanceIri, title, bestuurseenheidIri, dateSent, type) {
   const publicationErrorIri = `http://data.lblod.info/id/instance-publication-error/${uuid()}`;
@@ -31,6 +33,7 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
 
 
 export async function clearPublicationErrors() {
+  const yearAgo = subMonths(new Date(), ERROR_EXPIRATION_MONTHS);
   const clearPublicationErrors = `
   ${prefixes}
 
@@ -40,9 +43,11 @@ export async function clearPublicationErrors() {
     }
   } WHERE {
     GRAPH <http://mu.semte.ch/graphs/lpdc/ipdc-publication-errors> {
-        ?s a <http://data.lblod.info/vocabularies/lpdc/InstancePublicationError> .
-        ?s ?p ?o.
+        ?s a <http://data.lblod.info/vocabularies/lpdc/InstancePublicationError> ;
+          ?p ?o ;
+          schema:dateCreated ?dateCreated .
     }
+    FILTER ( ?dateCreated < ${sparqlEscapeDateTime(yearAgo)} )
   }
 `;
   await updateSudo(clearPublicationErrors);
