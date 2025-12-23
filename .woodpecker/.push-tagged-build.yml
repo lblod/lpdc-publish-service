@@ -1,13 +1,14 @@
 steps:
-  build-latest:
+  build:
     image: woodpeckerci/plugin-docker-buildx
     settings:
+      platforms: linux/amd64,linux/arm64
       repo: ${CI_REPO}
-      tags: latest
+      tags: ${CI_COMMIT_TAG##v}
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
 when:
-  - event: push
-    branch: [master]
+  - event: tag
+    ref: refs/tags/v*
