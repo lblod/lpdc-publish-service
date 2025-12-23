@@ -2,7 +2,8 @@ import {prefixes} from "../prefixes";
 import {sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeString, sparqlEscapeInt} from 'mu';
 import uuid from "uuid";
 import {updateSudo} from "@lblod/mu-auth-sudo";
-import { subYears } from "date-fns";
+import { subMonths } from "date-fns";
+import { ERROR_EXPIRATION_MONTHS } from "../env-config";
 
 export async function createPublicationError(errorCode, errorMessage, instanceIri, title, bestuurseenheidIri, dateSent, type) {
   const publicationErrorIri = `http://data.lblod.info/id/instance-publication-error/${uuid()}`;
@@ -32,7 +33,7 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
 
 
 export async function clearPublicationErrors() {
-  const yearAgo = subYears(new Date(), 1);
+  const yearAgo = subMonths(new Date(), ERROR_EXPIRATION_MONTHS);
   const clearPublicationErrors = `
   ${prefixes}
 
