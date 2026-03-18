@@ -1,24 +1,51 @@
-import {prefixes} from "../prefixes";
-import {sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeString, sparqlEscapeInt} from 'mu';
+import { prefixes } from "../prefixes";
+import {
+  sparqlEscapeUri,
+  sparqlEscapeDateTime,
+  sparqlEscapeString,
+  sparqlEscapeInt,
+} from "mu";
 import uuid from "uuid";
-import {updateSudo} from "@lblod/mu-auth-sudo";
+import { updateSudo } from "@lblod/mu-auth-sudo";
 import { subMonths } from "date-fns";
 import { ERROR_EXPIRATION_MONTHS } from "../env-config";
 
-export async function createPublicationError(errorCode, errorMessage, instanceIri, title, bestuurseenheidIri, dateSent, type) {
+export async function createPublicationError(
+  errorCode,
+  errorMessage,
+  instanceIri,
+  title,
+  bestuurseenheidIri,
+  dateSent,
+  type,
+) {
   const publicationErrorIri = `http://data.lblod.info/id/instance-publication-error/${uuid()}`;
 
   const triples = [
     `${sparqlEscapeUri(publicationErrorIri)} a lpdc:InstancePublicationError .`,
-    errorCode ? `${sparqlEscapeUri(publicationErrorIri)} http:statusCode ${sparqlEscapeInt(errorCode)} .` : undefined,
-    errorMessage ? `${sparqlEscapeUri(publicationErrorIri)} schema:error ${sparqlEscapeString(errorMessage)} .` : undefined,
-    instanceIri ? `${sparqlEscapeUri(publicationErrorIri)} dct:source ${sparqlEscapeUri(instanceIri)} .` : undefined,
-    title ? `${sparqlEscapeUri(publicationErrorIri)} dct:title ${sparqlEscapeString(title)} .` : undefined,
-    bestuurseenheidIri ? `${sparqlEscapeUri(publicationErrorIri)} foaf:owner ${sparqlEscapeUri(bestuurseenheidIri)} .` : undefined,
+    errorCode
+      ? `${sparqlEscapeUri(publicationErrorIri)} http:statusCode ${sparqlEscapeInt(errorCode)} .`
+      : undefined,
+    errorMessage
+      ? `${sparqlEscapeUri(publicationErrorIri)} schema:error ${sparqlEscapeString(errorMessage)} .`
+      : undefined,
+    instanceIri
+      ? `${sparqlEscapeUri(publicationErrorIri)} dct:source ${sparqlEscapeUri(instanceIri)} .`
+      : undefined,
+    title
+      ? `${sparqlEscapeUri(publicationErrorIri)} dct:title ${sparqlEscapeString(title)} .`
+      : undefined,
+    bestuurseenheidIri
+      ? `${sparqlEscapeUri(publicationErrorIri)} foaf:owner ${sparqlEscapeUri(bestuurseenheidIri)} .`
+      : undefined,
     `${sparqlEscapeUri(publicationErrorIri)} schema:dateCreated ${sparqlEscapeDateTime(new Date())} .`,
-    dateSent ? `${sparqlEscapeUri(publicationErrorIri)} schema:dateSent ${sparqlEscapeDateTime(dateSent)} .` : undefined,
-    type ? `${sparqlEscapeUri(publicationErrorIri)} as:formerType ${sparqlEscapeUri(type)} .` : undefined,
-  ].filter(it => !!it);
+    dateSent
+      ? `${sparqlEscapeUri(publicationErrorIri)} schema:dateSent ${sparqlEscapeDateTime(dateSent)} .`
+      : undefined,
+    type
+      ? `${sparqlEscapeUri(publicationErrorIri)} as:formerType ${sparqlEscapeUri(type)} .`
+      : undefined,
+  ].filter((it) => !!it);
 
   const insertPublicationError = `
   ${prefixes}
@@ -30,7 +57,6 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
   }`;
   await updateSudo(insertPublicationError);
 }
-
 
 export async function clearPublicationErrors() {
   const yearAgo = subMonths(new Date(), ERROR_EXPIRATION_MONTHS);

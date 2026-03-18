@@ -1,8 +1,8 @@
 import { prefixes } from "./prefixes";
-import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from 'mu';
+import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from "mu";
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
-import { RETRY_COUNTER_LIMIT } from './env-config.js';
+import { RETRY_COUNTER_LIMIT } from "./env-config.js";
 
 /*
  * Poll data from any graphs
@@ -98,7 +98,7 @@ export async function getPublicServiceDetails(publishedInstanceSnaphotId) {
         OPTIONAL { ?legalResourceId dct:title ?title. }
         OPTIONAL { ?legalResourceId dct:description ?description. }
   }
-  `
+  `;
   const legalResourceData = await query(legalResourceQuery);
   resultBindings.push(legalResourceData.results.bindings);
 
@@ -335,11 +335,11 @@ export async function getPublicServiceDetails(publishedInstanceSnaphotId) {
 function createResultObject(bindingsList) {
   const resultObject = {};
   const bindings = bindingsList.flat();
-  const uniqueSubjects = [...new Set(bindings.map(b => b.s.value))];
+  const uniqueSubjects = [...new Set(bindings.map((b) => b.s.value))];
   for (const subject of uniqueSubjects) {
-    const bindingsForSubject = bindings.filter(b => b.s.value === subject);
+    const bindingsForSubject = bindings.filter((b) => b.s.value === subject);
     resultObject[subject] = {
-      body: bindingsToNT(bindingsForSubject).join('\r\n') + "\r\n"
+      body: bindingsToNT(bindingsForSubject).join("\r\n") + "\r\n",
     };
   }
   return resultObject;
