@@ -14,31 +14,27 @@ export async function getServicesToPublish() {
     ${prefixes}
     SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph ?publishRetryCount
     WHERE {
-      {
-        SELECT ?publicservice (MAX(?generatedAt) AS ?maxGeneratedAt) ?graph
-        WHERE {
-          VALUES ?types {
-                lpdcExt:PublishedInstancePublicServiceSnapshot
-                 as:Tombstone
-            }
-          GRAPH ?graph {
-            ?publishedPublicService a ?types;
-                                    lpdcExt:isPublishedVersionOf ?publicservice;
-                                    prov:generatedAtTime ?generatedAt.
-          }
-        }
-        GROUP BY ?publicservice ?graph
+      VALUES ?types {
+        lpdcExt:PublishedInstancePublicServiceSnapshot
+        as:Tombstone
       }
       GRAPH ?graph {
         ?publishedPublicService a ?type;
-                                prov:generatedAtTime ?maxGeneratedAt.
-
-        OPTIONAL {
-          ?publishedPublicService ext:publishRetryCount ?publishRetryCount .
+                                lpdcExt:isPublishedVersionOf ?publicservice;
+                                prov:generatedAtTime ?generatedAt.
+      }
+      FILTER NOT EXISTS {
+        GRAPH ?graph {
+          ?newerSnapshot lpdcExt:isPublishedVersionOf ?publicservice;
+                        prov:generatedAtTime ?newerGeneratedAt.
+          FILTER(?newerGeneratedAt > ?generatedAt)
         }
       }
       FILTER NOT EXISTS {
-            ?publishedPublicService schema:datePublished ?datePublished.
+        ?publishedPublicService schema:datePublished ?datePublished.
+      }
+      OPTIONAL {
+        ?publishedPublicService ext:publishRetryCount ?publishRetryCount.
       }
       FILTER(COALESCE(?publishRetryCount, 0) < ${sparqlEscapeInt(RETRY_COUNTER_LIMIT)})
     }
