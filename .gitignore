@@ -1,3 +1,6 @@
 node_modules/
 .idea/
 /lpdc-publish-service.iml
+
+# Optional eslint cache
+.eslintcache

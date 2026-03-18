@@ -4,8 +4,6 @@ import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
 import { RETRY_COUNTER_LIMIT } from './env-config.js';
 
-const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
-
 /*
  * Poll data from any graphs
  */
@@ -42,7 +40,7 @@ export async function getServicesToPublish() {
 
   const result = (await query(queryString)).results.bindings;
   return result;
-};
+}
 
 /*
  * update the status of posted data.
