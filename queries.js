@@ -28,6 +28,8 @@ export async function getServicesToPublish() {
           FILTER(?newerGeneratedAt > ?generatedAt)
         }
       }
+
+      # Only process the most recent snapshot; intermediate ones between job runs are irrelevant.
       FILTER NOT EXISTS {
         ?publishedPublicService schema:datePublished ?datePublished.
       }
