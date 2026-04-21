@@ -33,7 +33,7 @@ new CronJob(CRON_PATTERN, async () => {
       try {
         const subjectsAndData = await getPublicServiceDetails(service.publishedPublicService.value);
 
-        await putDataToIpdc(service.graph.value, service.publishedPublicService.value, subjectsAndData);
+        await putDataToIpdc(service, subjectsAndData);
         await updateDatePublishedPublicService(service.publishedPublicService.value, service.type.value);
 
         console.log(`Successfully published ${service.publishedPublicService.value} of ${service.publicservice?.value}`);

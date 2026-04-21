@@ -27,5 +27,5 @@ export const prefixes = `
   PREFIX eli: <http://data.europa.eu/eli/ontology#>
   PREFIX prov: <http://www.w3.org/ns/prov#>
   PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-
+  PREFIX oslc: <http://open-services.net/ns/core#>
 `;
