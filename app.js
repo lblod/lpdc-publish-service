@@ -34,8 +34,11 @@ new CronJob(
             service.publishedPublicService.value,
           );
 
-        await putDataToIpdc(service, subjectsAndData);
-        await updateDatePublishedPublicService(service.publishedPublicService.value, service.type.value);
+          await putDataToIpdc(service, subjectsAndData);
+          await updateDatePublishedPublicService(
+            service.publishedPublicService.value,
+            service.type.value,
+          );
 
           console.log(
             `Successfully published ${service.publishedPublicService.value} of ${service.publicservice?.value}`,
