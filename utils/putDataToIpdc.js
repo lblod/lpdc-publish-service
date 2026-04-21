@@ -5,7 +5,7 @@ import {IPDC_JSON_ENDPOINT, IPDC_X_API_KEY, RETRY_COUNTER_LIMIT} from '../env-co
 import {createPublicationError} from "./publication-error";
 
 export async function putDataToIpdc(service, subjectsAndData) {
-  let ttl = '';
+  let ttl = "";
   for (const subject of Object.keys(subjectsAndData)) {
     const body = subjectsAndData[subject].body;
     ttl += body;
@@ -13,39 +13,62 @@ export async function putDataToIpdc(service, subjectsAndData) {
 
   const graph = service.graph.value;
   const publishedInstanceIri = service.publishedPublicService.value;
-  const parser = new N3.Parser({format: 'text/turtle'});
+  const parser = new N3.Parser({format: "text/turtle"});
 
   let quads = parser.parse(ttl);
 
-  const instanceObject = quads
-    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf')
-    ?.object;
+  const instanceObject = quads.find(
+    (q) =>
+      q.subject.value === publishedInstanceIri &&
+      q.predicate.value ===
+        "https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf",
+  )?.object;
 
-  const generatedAtTime = quads
-    .find(q => q.subject.value === publishedInstanceIri && q.predicate.value === 'http://www.w3.org/ns/prov#generatedAtTime')
-    ?.object?.value;
+  const generatedAtTime = quads.find(
+    (q) =>
+      q.subject.value === publishedInstanceIri &&
+      q.predicate.value === "http://www.w3.org/ns/prov#generatedAtTime",
+  )?.object?.value;
 
   const instanceIri = instanceObject?.value;
 
   if (instanceObject === undefined || instanceIri === undefined) {
-    throw new Error(`Could not find isPublishedVersionOf for <${publishedInstanceIri}> in <${graph}>`);
+    throw new Error(
+      `Could not find isPublishedVersionOf for <${publishedInstanceIri}> in <${graph}>`,
+    );
   }
 
   quads = quads
-    .map(q => {
+    .map((q) => {
       if (q.subject.value === publishedInstanceIri) {
         return new Quad(instanceObject, q.predicate, q.object);
       } else {
         return q;
       }
     })
-    .filter(q => q.predicate.value !== 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf')
-    .filter(q => q.predicate.value !== 'http://www.w3.org/ns/prov#generatedAtTime')
-    .map(q => {
-      if (q.subject.value === instanceIri
-        && q.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
-        && q.object.value === 'https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#PublishedInstancePublicServiceSnapshot') {
-        return new Quad(q.subject, q.predicate, new NamedNode('https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#InstancePublicService'));
+    .filter(
+      (q) =>
+        q.predicate.value !==
+        "https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#isPublishedVersionOf",
+    )
+    .filter(
+      (q) => q.predicate.value !== "http://www.w3.org/ns/prov#generatedAtTime",
+    )
+    .map((q) => {
+      if (
+        q.subject.value === instanceIri &&
+        q.predicate.value ===
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
+        q.object.value ===
+          "https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#PublishedInstancePublicServiceSnapshot"
+      ) {
+        return new Quad(
+          q.subject,
+          q.predicate,
+          new NamedNode(
+            "https://productencatalogus.data.vlaanderen.be/ns/ipdc-lpdc#InstancePublicService",
+          ),
+        );
       } else {
         return q;
       }
@@ -56,20 +79,25 @@ export async function putDataToIpdc(service, subjectsAndData) {
   const bestuurseenheidIri = `http://data.lblod.info/id/bestuurseenheden/${bestuurseenheidId}`;
 
   const titleQuad = quads
-    .filter(q => q.subject.value === instanceIri && q.predicate.value === 'http://purl.org/dc/terms/title')
-    .filter(q => q.object.language.startsWith('nl'));
+    .filter(
+      (q) =>
+        q.subject.value === instanceIri &&
+        q.predicate.value === "http://purl.org/dc/terms/title",
+    )
+    .filter((q) => q.object.language.startsWith("nl"));
   const title = titleQuad[0]?.object?.value;
 
   const type = quads.find(
-    q => q.predicate.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+    (q) =>
+      q.predicate.value === "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
   )?.object?.value;
 
   const fromRdf = await jsonld.fromRDF(quads);
   const doc = await jsonld.expand(fromRdf);
 
   const headers = {
-    'x-api-key': IPDC_X_API_KEY,
-    'Content-Type': 'application/ld+json'
+    "x-api-key": IPDC_X_API_KEY,
+    "Content-Type": "application/ld+json",
   };
 
   const response = await fetch(IPDC_JSON_ENDPOINT, {
@@ -89,7 +117,7 @@ export async function putDataToIpdc(service, subjectsAndData) {
         await createPublicationError(response.status, error, instanceIri, title, bestuurseenheidIri, generatedAtTime, type);
       }
     } catch (e) {
-      console.log('Could not save publicationError', e);
+      console.log("Could not save publicationError", e);
     }
     throw new Error(error);
   } else {
@@ -97,12 +125,11 @@ export async function putDataToIpdc(service, subjectsAndData) {
   }
 }
 
-
 async function getResponseBody(response) {
   const text = await response.text();
   try {
     return JSON.parse(text);
   } catch (e) {
-    return {message: text}
+    return { message: text };
   }
 }

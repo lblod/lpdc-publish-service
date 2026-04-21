@@ -1,10 +1,8 @@
 import { prefixes } from "./prefixes";
-import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from 'mu';
+import { sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeInt } from "mu";
 import { querySudo as query, updateSudo as update } from "@lblod/mu-auth-sudo";
 import { bindingsToNT } from "./utils/bindingsToNT";
-import { RETRY_COUNTER_LIMIT } from './env-config.js';
-
-const VERZONDEN_URI = "http://lblod.data.gift/concepts/instance-status/verzonden";
+import { RETRY_COUNTER_LIMIT } from "./env-config.js";
 
 /*
  * Poll data from any graphs
@@ -14,31 +12,29 @@ export async function getServicesToPublish() {
     ${prefixes}
     SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph ?publishRetryCount
     WHERE {
-      {
-        SELECT ?publicservice (MAX(?generatedAt) AS ?maxGeneratedAt) ?graph
-        WHERE {
-          VALUES ?types {
-                lpdcExt:PublishedInstancePublicServiceSnapshot
-                 as:Tombstone
-            }
-          GRAPH ?graph {
-            ?publishedPublicService a ?types;
-                                    lpdcExt:isPublishedVersionOf ?publicservice;
-                                    prov:generatedAtTime ?generatedAt.
-          }
-        }
-        GROUP BY ?publicservice ?graph
+      VALUES ?types {
+        lpdcExt:PublishedInstancePublicServiceSnapshot
+        as:Tombstone
       }
       GRAPH ?graph {
         ?publishedPublicService a ?type;
-                                prov:generatedAtTime ?maxGeneratedAt.
-
-        OPTIONAL {
-          ?publishedPublicService ext:publishRetryCount ?publishRetryCount .
-        }
+                                lpdcExt:isPublishedVersionOf ?publicservice;
+                                prov:generatedAtTime ?generatedAt.
       }
       FILTER NOT EXISTS {
-            ?publishedPublicService schema:datePublished ?datePublished.
+        GRAPH ?graph {
+          ?newerSnapshot lpdcExt:isPublishedVersionOf ?publicservice;
+                        prov:generatedAtTime ?newerGeneratedAt.
+          FILTER(?newerGeneratedAt > ?generatedAt)
+        }
+      }
+
+      # Only process the most recent snapshot; intermediate ones between job runs are irrelevant.
+      FILTER NOT EXISTS {
+        ?publishedPublicService schema:datePublished ?datePublished.
+      }
+      OPTIONAL {
+        ?publishedPublicService ext:publishRetryCount ?publishRetryCount.
       }
       FILTER(COALESCE(?publishRetryCount, 0) < ${sparqlEscapeInt(RETRY_COUNTER_LIMIT)})
     }
@@ -46,7 +42,7 @@ export async function getServicesToPublish() {
 
   const result = (await query(queryString)).results.bindings;
   return result;
-};
+}
 
 /*
  * update the status of posted data.
@@ -104,7 +100,7 @@ export async function getPublicServiceDetails(publishedInstanceSnaphotId) {
         OPTIONAL { ?legalResourceId dct:title ?title. }
         OPTIONAL { ?legalResourceId dct:description ?description. }
   }
-  `
+  `;
   const legalResourceData = await query(legalResourceQuery);
   resultBindings.push(legalResourceData.results.bindings);
 
@@ -341,11 +337,11 @@ export async function getPublicServiceDetails(publishedInstanceSnaphotId) {
 function createResultObject(bindingsList) {
   const resultObject = {};
   const bindings = bindingsList.flat();
-  const uniqueSubjects = [...new Set(bindings.map(b => b.s.value))];
+  const uniqueSubjects = [...new Set(bindings.map((b) => b.s.value))];
   for (const subject of uniqueSubjects) {
-    const bindingsForSubject = bindings.filter(b => b.s.value === subject);
+    const bindingsForSubject = bindings.filter((b) => b.s.value === subject);
     resultObject[subject] = {
-      body: bindingsToNT(bindingsForSubject).join('\r\n') + "\r\n"
+      body: bindingsToNT(bindingsForSubject).join("\r\n") + "\r\n",
     };
   }
   return resultObject;

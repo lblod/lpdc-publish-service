@@ -1,7 +1,12 @@
-import {prefixes} from "../prefixes";
-import {sparqlEscapeUri, sparqlEscapeDateTime, sparqlEscapeString, sparqlEscapeInt} from 'mu';
+import { prefixes } from "../prefixes";
+import {
+  sparqlEscapeUri,
+  sparqlEscapeDateTime,
+  sparqlEscapeString,
+  sparqlEscapeInt,
+} from "mu";
 import uuid from "uuid";
-import {updateSudo} from "@lblod/mu-auth-sudo";
+import { updateSudo } from "@lblod/mu-auth-sudo";
 import { subMonths } from "date-fns";
 import { ERROR_EXPIRATION_MONTHS } from "../env-config";
 
@@ -36,7 +41,6 @@ export async function createPublicationError(errorCode, errorMessage, instanceIr
   }`;
   await updateSudo(insertPublicationError);
 }
-
 
 export async function clearPublicationErrors() {
   const yearAgo = subMonths(new Date(), ERROR_EXPIRATION_MONTHS);
