@@ -1,20 +1,22 @@
 import * as jsonld from "jsonld";
 import N3, { NamedNode, Quad } from "n3";
 import fetch from "node-fetch";
-import { IPDC_JSON_ENDPOINT, IPDC_X_API_KEY } from "../env-config";
+import {
+  IPDC_JSON_ENDPOINT,
+  IPDC_X_API_KEY,
+  RETRY_COUNTER_LIMIT,
+} from "../env-config";
 import { createPublicationError } from "./publication-error";
 
-export async function putDataToIpdc(
-  graph,
-  publishedInstanceIri,
-  subjectsAndData,
-) {
+export async function putDataToIpdc(service, subjectsAndData) {
   let ttl = "";
   for (const subject of Object.keys(subjectsAndData)) {
     const body = subjectsAndData[subject].body;
     ttl += body;
   }
 
+  const graph = service.graph.value;
+  const publishedInstanceIri = service.publishedPublicService.value;
   const parser = new N3.Parser({ format: "text/turtle" });
 
   let quads = parser.parse(ttl);
@@ -110,30 +112,34 @@ export async function putDataToIpdc(
 
   if (!response.ok) {
     const responseBody = await getResponseBody(response);
+    const error =
+      "Something went wrong when submitting to IPDC: \n" +
+      "IPDC response: " +
+      JSON.stringify(responseBody) +
+      "\n" +
+      "Response status code: " +
+      response.status +
+      "\n" +
+      "Data sent to IPDC: " +
+      JSON.stringify(doc);
     try {
-      await createPublicationError(
-        response.status,
-        JSON.stringify(responseBody),
-        instanceIri,
-        title,
-        bestuurseenheidIri,
-        generatedAtTime,
-        type,
-      );
+      const retriesLeft =
+        RETRY_COUNTER_LIMIT - (service.publishRetryCount?.value ?? 0) - 1;
+      if (retriesLeft <= 0) {
+        await createPublicationError(
+          response.status,
+          error,
+          instanceIri,
+          title,
+          bestuurseenheidIri,
+          generatedAtTime,
+          type,
+        );
+      }
     } catch (e) {
       console.log("Could not save publicationError", e);
     }
-    throw new Error(
-      "Something went wrong when submitting to IPDC: \n" +
-        "IPDC response: " +
-        JSON.stringify(responseBody) +
-        "\n" +
-        "Response status code: " +
-        response.status +
-        "\n" +
-        "Data sent to IPDC: " +
-        JSON.stringify(doc),
-    );
+    throw new Error(error);
   } else {
     console.log("Successfully sent data to IPDC: \n" + JSON.stringify(doc));
   }

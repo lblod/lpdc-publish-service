@@ -34,11 +34,7 @@ new CronJob(
             service.publishedPublicService.value,
           );
 
-          await putDataToIpdc(
-            service.graph.value,
-            service.publishedPublicService.value,
-            subjectsAndData,
-          );
+          await putDataToIpdc(service, subjectsAndData);
           await updateDatePublishedPublicService(
             service.publishedPublicService.value,
             service.type.value,
