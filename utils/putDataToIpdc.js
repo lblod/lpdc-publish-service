@@ -8,6 +8,8 @@ import {
 } from "../env-config";
 import { createPublicationError } from "./publication-error";
 
+export class NonRetryableError extends Error {}
+
 export async function putDataToIpdc(service, subjectsAndData) {
   let ttl = "";
   for (const subject of Object.keys(subjectsAndData)) {
@@ -122,10 +124,13 @@ export async function putDataToIpdc(service, subjectsAndData) {
       "\n" +
       "Data sent to IPDC: " +
       JSON.stringify(doc);
+    const isValidationError =
+      response.status === 400 && responseBody.type === "error.validation";
+
     try {
       const retriesLeft =
         RETRY_COUNTER_LIMIT - (service.publishRetryCount?.value ?? 0) - 1;
-      if (retriesLeft <= 0) {
+      if (isValidationError || retriesLeft <= 0) {
         await createPublicationError(
           response.status,
           error,
@@ -138,6 +143,9 @@ export async function putDataToIpdc(service, subjectsAndData) {
       }
     } catch (e) {
       console.log("Could not save publicationError", e);
+    }
+    if (isValidationError) {
+      throw new NonRetryableError(error);
     }
     throw new Error(error);
   } else {

@@ -371,3 +371,27 @@ export async function incrementRetryCounter(publishedServiceUri) {
     }
   `);
 }
+
+export async function setRetryCounter(publishedServiceUri, counter) {
+  await update(`
+    ${prefixes}
+    DELETE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+      }
+    }
+    INSERT {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ${sparqlEscapeInt(counter)} .
+      }
+    }
+    WHERE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ?p ?o .
+        OPTIONAL {
+          ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+        }
+      }
+    }
+  `);
+}
