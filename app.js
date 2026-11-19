@@ -10,17 +10,11 @@ import {
 import { putDataToIpdc, NonRetryableError } from "./utils/putDataToIpdc";
 import { CRON_PATTERN, RETRY_COUNTER_LIMIT } from "./env-config";
 import { clearPublicationErrors } from "./utils/publication-error";
-let inProgress = false;
 
-new CronJob(
-  CRON_PATTERN,
-  async () => {
-    if (inProgress) {
-      console.log("Process already in progress");
-      return;
-    }
+CronJob.from({
+  cronTime: CRON_PATTERN,
+  onTick: async () => {
     try {
-      inProgress = true;
       const servicesToPublish = await getServicesToPublish();
 
       console.log(`Found ${servicesToPublish.length} to publish`);
@@ -71,12 +65,10 @@ new CronJob(
     } catch (e) {
       console.error("General error fetching data, retrying later");
       console.log(e);
-    } finally {
-      inProgress = false;
     }
   },
-  null,
-  true,
-);
+  start: true,
+  waitForCompletion: true,
+});
 
 app.use(errorHandler);
