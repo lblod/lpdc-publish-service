@@ -1,6 +1,5 @@
-import * as jsonld from "jsonld";
+import jsonld from "jsonld";
 import N3, { NamedNode, Quad } from "n3";
-import fetch from "node-fetch";
 import {
   IPDC_JSON_ENDPOINT,
   IPDC_X_API_KEY,
@@ -157,7 +156,7 @@ async function getResponseBody(response) {
   const text = await response.text();
   try {
     return JSON.parse(text);
-  } catch (e) {
+  } catch {
     return { message: text };
   }
 }

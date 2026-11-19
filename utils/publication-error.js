@@ -4,8 +4,8 @@ import {
   sparqlEscapeDateTime,
   sparqlEscapeString,
   sparqlEscapeInt,
+  uuid,
 } from "mu";
-import uuid from "uuid";
 import { updateSudo } from "@lblod/mu-auth-sudo";
 import { subMonths } from "date-fns";
 import { ERROR_EXPIRATION_MONTHS } from "../env-config";

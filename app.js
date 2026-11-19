@@ -1,6 +1,5 @@
 import { app, errorHandler } from "mu";
 import { CronJob } from "cron";
-import bodyparser from "body-parser";
 import {
   getPublicServiceDetails,
   getServicesToPublish,
@@ -11,9 +10,6 @@ import {
 import { putDataToIpdc, NonRetryableError } from "./utils/putDataToIpdc";
 import { CRON_PATTERN, RETRY_COUNTER_LIMIT } from "./env-config";
 import { clearPublicationErrors } from "./utils/publication-error";
-
-app.use(bodyparser.json());
-
 let inProgress = false;
 
 new CronJob(
