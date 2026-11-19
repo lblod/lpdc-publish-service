@@ -12,7 +12,7 @@ export async function getServicesToPublish() {
     ${prefixes}
     SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph ?publishRetryCount
     WHERE {
-      VALUES ?types {
+      VALUES ?type {
         lpdcExt:PublishedInstancePublicServiceSnapshot
         as:Tombstone
       }
