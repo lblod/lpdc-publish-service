@@ -124,7 +124,7 @@ export async function putDataToIpdc(service, subjectsAndData) {
       "Data sent to IPDC: " +
       JSON.stringify(doc);
     const isValidationError =
-      response.status === 400 && responseBody.type === "error.validation";
+      response.status === 400 && responseBody?.type === "error.validation";
 
     try {
       const retriesLeft =
