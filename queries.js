@@ -12,7 +12,7 @@ export async function getServicesToPublish() {
     ${prefixes}
     SELECT DISTINCT ?publicservice ?publishedPublicService ?type ?graph ?publishRetryCount
     WHERE {
-      VALUES ?types {
+      VALUES ?type {
         lpdcExt:PublishedInstancePublicServiceSnapshot
         as:Tombstone
       }
@@ -367,6 +367,30 @@ export async function incrementRetryCounter(publishedServiceUri) {
           ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
         }
         BIND (COALESCE(?counter, 0)+1 AS ?incrementedCounter)
+      }
+    }
+  `);
+}
+
+export async function setRetryCounter(publishedServiceUri, counter) {
+  await update(`
+    ${prefixes}
+    DELETE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+      }
+    }
+    INSERT {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ${sparqlEscapeInt(counter)} .
+      }
+    }
+    WHERE {
+      GRAPH ?g {
+        ${sparqlEscapeUri(publishedServiceUri)} ?p ?o .
+        OPTIONAL {
+          ${sparqlEscapeUri(publishedServiceUri)} ext:publishRetryCount ?counter .
+        }
       }
     }
   `);

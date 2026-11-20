@@ -1,12 +1,13 @@
-import * as jsonld from "jsonld";
+import jsonld from "jsonld";
 import N3, { NamedNode, Quad } from "n3";
-import fetch from "node-fetch";
 import {
   IPDC_JSON_ENDPOINT,
   IPDC_X_API_KEY,
   RETRY_COUNTER_LIMIT,
 } from "../env-config";
 import { createPublicationError } from "./publication-error";
+
+export class NonRetryableError extends Error {}
 
 export async function putDataToIpdc(service, subjectsAndData) {
   let ttl = "";
@@ -122,10 +123,13 @@ export async function putDataToIpdc(service, subjectsAndData) {
       "\n" +
       "Data sent to IPDC: " +
       JSON.stringify(doc);
+    const isValidationError =
+      response.status === 400 && responseBody.type === "error.validation";
+
     try {
       const retriesLeft =
         RETRY_COUNTER_LIMIT - (service.publishRetryCount?.value ?? 0) - 1;
-      if (retriesLeft <= 0) {
+      if (isValidationError || retriesLeft <= 0) {
         await createPublicationError(
           response.status,
           error,
@@ -139,6 +143,9 @@ export async function putDataToIpdc(service, subjectsAndData) {
     } catch (e) {
       console.log("Could not save publicationError", e);
     }
+    if (isValidationError) {
+      throw new NonRetryableError(error);
+    }
     throw new Error(error);
   } else {
     console.log("Successfully sent data to IPDC: \n" + JSON.stringify(doc));
@@ -149,7 +156,7 @@ async function getResponseBody(response) {
   const text = await response.text();
   try {
     return JSON.parse(text);
-  } catch (e) {
+  } catch {
     return { message: text };
   }
 }
